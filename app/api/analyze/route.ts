@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { buildPrompt, FREE_LIMIT, type AnalysisResult } from "@/lib/analyze";
+import devConfig from "@/lib/devConfig";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -85,6 +86,9 @@ export async function POST(req: Request) {
   const data = await geminiRes.json();
   const raw: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
+  // Token usage z Gemini API
+  const usage = data?.usageMetadata ?? null;
+
   let result: AnalysisResult;
   try {
     result = JSON.parse(raw.replace(/```json|```/g, "").trim());
@@ -118,5 +122,18 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ result, usesLeft: FREE_LIMIT - (used + 1) });
+  const response: Record<string, unknown> = {
+    result,
+    usesLeft: FREE_LIMIT - (used + 1),
+  };
+
+  if (devConfig.showTokenUsage && usage) {
+    response.tokenUsage = {
+      promptTokens: usage.promptTokenCount ?? 0,
+      responseTokens: usage.candidatesTokenCount ?? 0,
+      totalTokens: usage.totalTokenCount ?? 0,
+    };
+  }
+
+  return NextResponse.json(response);
 }

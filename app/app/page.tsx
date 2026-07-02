@@ -4,7 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import AppSidebar from "@/app/components/AppSidebar";
+import devConfig from "@/lib/devConfig";
 import type { AnalysisResult } from "@/lib/analyze";
+
+type TokenUsage = { promptTokens: number; responseTokens: number; totalTokens: number };
 
 const statusColor: Record<string, { dot: string }> = {
   red: { dot: "#DC2626" },
@@ -33,6 +36,7 @@ export default function AppPage() {
   const [linkedinActivity, setLinkedinActivity] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [tokenUsage, setTokenUsage] = useState<TokenUsage | null>(null);
   const [error, setError] = useState("");
   const [limitReached, setLimitReached] = useState(false);
 
@@ -48,6 +52,7 @@ export default function AppPage() {
 
   function resetAnalysis() {
     setResult(null);
+    setTokenUsage(null);
     setError("");
     setJobText("");
     setCompany("");
@@ -79,6 +84,7 @@ export default function AppPage() {
 
     const data = await res.json();
     setResult(data.result);
+    setTokenUsage(data.tokenUsage ?? null);
     setRefreshKey((k) => k + 1); // odśwież listę w sidebarze
     setTimeout(() => mainRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 50);
   }
@@ -180,6 +186,29 @@ export default function AppPage() {
                 >
                   Sprawdź kolejną ofertę
                 </button>
+
+                {/* Dev: Token usage */}
+                {devConfig.showTokenUsage && tokenUsage && (
+                  <div className="mt-4 bg-[#1e1e1e] text-[#d4d4d4] rounded-xl px-4 py-3 font-mono text-[12px] leading-relaxed">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-[#6B6A63] mb-2">
+                      Dev — Token usage
+                    </div>
+                    <div className="flex gap-6">
+                      <div>
+                        <span className="text-[#9C9B93]">prompt </span>
+                        <span className="text-[#4EC9B0]">{tokenUsage.promptTokens.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-[#9C9B93]">response </span>
+                        <span className="text-[#4EC9B0]">{tokenUsage.responseTokens.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-[#9C9B93]">total </span>
+                        <span className="text-white font-bold">{tokenUsage.totalTokens.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
