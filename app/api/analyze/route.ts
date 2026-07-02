@@ -96,7 +96,7 @@ export async function POST(req: Request) {
   }
 
   // 5. zapis analizy (do liczenia limitu i historii)
-  await supabase.from("analyses").insert({
+  const row = {
     user_id: user.id,
     verdict: result.verdict,
     score: result.score,
@@ -104,7 +104,19 @@ export async function POST(req: Request) {
     job_excerpt: jobText.slice(0, 200),
     verdict_label: result.verdictLabel,
     summary: result.summary,
-  });
+    criteria: result.criteria,
+  };
+
+  const { error: insertErr } = await supabase.from("analyses").insert(row);
+  if (insertErr) {
+    // Kolumna criteria może nie istnieć — spróbuj bez niej
+    console.error("INSERT error (retrying without criteria):", insertErr.message);
+    const { criteria: _, ...rowWithout } = row;
+    const { error: retryErr } = await supabase.from("analyses").insert(rowWithout);
+    if (retryErr) {
+      console.error("INSERT retry error:", retryErr.message);
+    }
+  }
 
   return NextResponse.json({ result, usesLeft: FREE_LIMIT - (used + 1) });
 }

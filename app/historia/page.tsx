@@ -1,6 +1,20 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import Link from "next/link";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import AppSidebar from "@/app/components/AppSidebar";
+
+type Analysis = {
+  id: string;
+  company: string | null;
+  verdict: string;
+  verdict_label: string | null;
+  score: number | null;
+  summary: string | null;
+  job_excerpt: string | null;
+  created_at: string;
+};
 
 const verdictStyle: Record<string, { bg: string; border: string; text: string }> = {
   safe: { bg: "#F0FDF4", border: "#BBF7D0", text: "#166534" },
@@ -17,97 +31,122 @@ function formatDate(iso: string) {
   });
 }
 
-export default async function HistoriaPage() {
-  const supabase = await createClient();
+export default function HistoriaPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<{ nickname?: string; email?: string }>({});
+  const [analyses, setAnalyses] = useState<Analysis[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  useEffect(() => {
+    const supabase = createClient();
 
-  const { data: analyses } = await supabase
-    .from("analyses")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(50);
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) { router.push("/login"); return; }
+
+      setUser({
+        nickname: data.user.user_metadata?.nickname,
+        email: data.user.email,
+      });
+
+      const { data: rows } = await supabase
+        .from("analyses")
+        .select("id, company, verdict, verdict_label, score, summary, job_excerpt, created_at")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      setAnalyses(rows ?? []);
+      setLoading(false);
+    });
+  }, [router]);
 
   return (
     <div
-      className="min-h-screen bg-[#FAFAF7] text-[#0A0A0A]"
+      className="flex h-screen bg-[#FAFAF7] text-[#0A0A0A] overflow-hidden"
       style={{ fontFamily: "'Satoshi', ui-sans-serif, system-ui, sans-serif" }}
     >
-      <nav className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-[9px] bg-black text-white flex items-center justify-center font-black text-[17px]">
-            W
-          </div>
-          <span className="font-bold text-[19px] tracking-tight">Wydmuszka</span>
-        </Link>
-        <Link
-          href="/app"
-          className="text-sm font-semibold border border-[#ECEAE3] bg-white rounded-full px-4 py-2"
-        >
-          Nowa analiza
-        </Link>
-      </nav>
+      <AppSidebar
+        user={user}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
 
-      <main className="max-w-[760px] mx-auto px-6 pt-6 pb-20">
-        <h1 className="text-[32px] font-black tracking-tight mb-1">Historia analiz</h1>
-        <p className="text-[#57564F] mb-8">Twoje ostatnie sprawdzone oferty.</p>
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Mobile topbar */}
+        <div className="md:hidden flex items-center gap-3 px-4 py-3.5 border-b border-[#ECEAE3] bg-white">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-1.5 rounded-lg hover:bg-[#F5F4EF] transition-colors"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M3 5h14M3 10h14M3 15h14" stroke="#0A0A0A" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+          <span className="font-bold text-[17px] tracking-tight">Historia analiz</span>
+        </div>
 
-        {!analyses || analyses.length === 0 ? (
-          <div className="bg-white border border-[#ECEAE3] rounded-3xl p-10 text-center">
-            <p className="text-[#57564F] mb-5">
-              Nie masz jeszcze żadnych analiz.
-            </p>
-            <Link
-              href="/app"
-              className="inline-block py-3 px-6 rounded-xl bg-black text-white font-bold text-[15px]"
-            >
-              Sprawdź pierwszą ofertę
-            </Link>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {analyses.map((a) => {
-              const vs = verdictStyle[a.verdict] || verdictStyle.warning;
-              return (
-                <div
-                  key={a.id}
-                  className="bg-white border border-[#ECEAE3] rounded-2xl p-5"
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-[720px] mx-auto px-5 py-10 pb-16">
+            <h1 className="text-[32px] font-black tracking-tight mb-1">Historia analiz</h1>
+            <p className="text-[#57564F] mb-8">Twoje ostatnie sprawdzone oferty.</p>
+
+            {loading && (
+              <div className="flex items-center justify-center py-20">
+                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+
+            {!loading && analyses.length === 0 && (
+              <div className="bg-white border border-[#ECEAE3] rounded-3xl p-10 text-center">
+                <p className="text-[#57564F] mb-5">Nie masz jeszcze żadnych analiz.</p>
+                <a
+                  href="/app"
+                  className="inline-block py-3 px-6 rounded-xl bg-black text-white font-bold text-[15px] hover:bg-[#1a1a1a] transition-colors"
                 >
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="min-w-0">
-                      <div className="font-semibold text-[15px] truncate">
-                        {a.company || "Bez nazwy firmy"}
+                  Sprawdź pierwszą ofertę
+                </a>
+              </div>
+            )}
+
+            {!loading && analyses.length > 0 && (
+              <div className="flex flex-col gap-3">
+                {analyses.map((a) => {
+                  const vs = verdictStyle[a.verdict] ?? verdictStyle.warning;
+                  return (
+                    <div key={a.id} className="bg-white border border-[#ECEAE3] rounded-2xl p-5">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div className="min-w-0">
+                          <div className="font-semibold text-[15px] truncate">
+                            {a.company || "Bez nazwy firmy"}
+                          </div>
+                          <div className="text-[13px] text-[#9C9B93] mt-0.5">
+                            {formatDate(a.created_at)}
+                          </div>
+                        </div>
+                        <div
+                          className="shrink-0 text-[13px] font-bold rounded-full px-3 py-1"
+                          style={{ background: vs.bg, border: `1px solid ${vs.border}`, color: vs.text }}
+                        >
+                          {a.verdict_label || a.verdict}{a.score != null ? ` · ${a.score}/6` : ""}
+                        </div>
                       </div>
-                      <div className="text-[13px] text-[#9C9B93] mt-0.5">
-                        {formatDate(a.created_at)}
-                      </div>
+                      {a.summary && (
+                        <p className="text-[13.5px] text-[#57564F] leading-snug mb-2">{a.summary}</p>
+                      )}
+                      {a.job_excerpt && (
+                        <p className="text-[12.5px] text-[#9C9B93] leading-snug line-clamp-2">
+                          {a.job_excerpt}…
+                        </p>
+                      )}
                     </div>
-                    <div
-                      className="shrink-0 text-[13px] font-bold rounded-full px-3 py-1"
-                      style={{ background: vs.bg, border: `1px solid ${vs.border}`, color: vs.text }}
-                    >
-                      {a.verdict_label || a.verdict} · {a.score}/6
-                    </div>
-                  </div>
-                  {a.summary && (
-                    <p className="text-[13.5px] text-[#57564F] leading-snug mb-2">
-                      {a.summary}
-                    </p>
-                  )}
-                  {a.job_excerpt && (
-                    <p className="text-[12.5px] text-[#9C9B93] leading-snug line-clamp-2">
-                      {a.job_excerpt}…
-                    </p>
-                  )}
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
           </div>
-        )}
-      </main>
+        </div>
+      </div>
     </div>
   );
 }

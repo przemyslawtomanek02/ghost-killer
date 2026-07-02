@@ -7,6 +7,11 @@ create table if not exists public.analyses (
   user_id uuid not null references auth.users(id) on delete cascade,
   verdict text,
   score int,
+  company text,
+  job_excerpt text,
+  verdict_label text,
+  summary text,
+  criteria jsonb,
   created_at timestamptz not null default now()
 );
 
