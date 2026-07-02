@@ -1,6 +1,6 @@
 // Wspólna logika analizy — używana przez backend (route.ts)
 
-export const FREE_LIMIT = 3; // darmowe analizy / miesiąc
+export const FREE_LIMIT = 999999; // darmowe analizy / miesiąc (tymczasowo bez limitu na czas testów)
 
 export type CriterionStatus = "red" | "yellow" | "green";
 

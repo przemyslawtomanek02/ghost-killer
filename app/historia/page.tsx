@@ -44,7 +44,7 @@ export default async function HistoriaPage() {
           <span className="font-bold text-[19px] tracking-tight">Wydmuszka</span>
         </Link>
         <Link
-          href="/"
+          href="/app"
           className="text-sm font-semibold border border-[#ECEAE3] bg-white rounded-full px-4 py-2"
         >
           Nowa analiza
@@ -61,7 +61,7 @@ export default async function HistoriaPage() {
               Nie masz jeszcze żadnych analiz.
             </p>
             <Link
-              href="/"
+              href="/app"
               className="inline-block py-3 px-6 rounded-xl bg-black text-white font-bold text-[15px]"
             >
               Sprawdź pierwszą ofertę

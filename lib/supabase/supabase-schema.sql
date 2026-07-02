@@ -27,10 +27,20 @@ create policy "wlasne_analizy_insert"
 -- (Później dla Stripe) profil z statusem subskrypcji
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
+  nickname text unique,
   is_pro boolean not null default false,
   stripe_customer_id text,
   created_at timestamptz not null default now()
 );
+
+-- Funkcja do sprawdzenia dostępności nicku (dostępna dla anonimowych — omija RLS)
+create or replace function public.is_nickname_taken(p_nickname text)
+returns boolean language sql security definer as $$
+  select exists (
+    select 1 from public.profiles
+    where lower(nickname) = lower(p_nickname)
+  );
+$$;
 
 alter table public.profiles enable row level security;
 
@@ -42,7 +52,8 @@ create policy "wlasny_profil_select"
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer as $$
 begin
-  insert into public.profiles (id) values (new.id)
+  insert into public.profiles (id, nickname)
+  values (new.id, new.raw_user_meta_data->>'nickname')
   on conflict (id) do nothing;
   return new;
 end;
