@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -33,7 +34,8 @@ export default function LoginPage() {
     if (error) {
       setError("Nieprawidłowy e-mail lub hasło.");
     } else {
-      router.push("/app");
+      const next = searchParams.get("next") ?? "/app";
+      router.push(next);
     }
   }
 
@@ -90,9 +92,17 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label className="block text-[13px] font-semibold text-[#6B6A63] mb-1.5">
-                Hasło
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[13px] font-semibold text-[#6B6A63]">
+                  Hasło
+                </label>
+                <Link
+                  href="/reset-password"
+                  className="text-[12px] text-[#9C9B93] hover:text-[#0A0A0A] transition-colors"
+                >
+                  Zapomniałem hasła
+                </Link>
+              </div>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -140,5 +150,19 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
+          <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

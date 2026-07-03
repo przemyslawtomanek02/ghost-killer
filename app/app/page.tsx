@@ -130,14 +130,19 @@ export default function AppPage() {
             {limitReached && (
               <div className="bg-white border border-[#ECEAE3] rounded-3xl p-8 text-center mb-6">
                 <h2 className="text-2xl font-black tracking-tight mb-2">Limit darmowych analiz</h2>
-                <p className="text-[#57564F] mb-5">Wykorzystałeś darmowe analizy w tym miesiącu. Plan Pro znosi limit.</p>
+                <p className="text-[#57564F] mb-5">Wykorzystałeś 3 darmowe analizy w tym miesiącu. Limit odnowi się 1. dnia następnego miesiąca.</p>
                 <div className="bg-[#FAFAF7] border border-[#ECEAE3] rounded-2xl p-5 mb-4">
                   <div className="text-4xl font-black tracking-tight">
                     29 zł<span className="text-base font-medium text-[#6B6A63]">/mies.</span>
                   </div>
                   <div className="text-sm text-[#6B6A63] mt-1">Nielimitowane analizy + historia</div>
                 </div>
-                <button className="w-full py-3.5 rounded-xl bg-black text-white font-bold">Przejdź na Pro</button>
+                <a
+                  href="mailto:kontakt@analyss.pl?subject=Zainteresowanie%20planem%20Pro&body=Cześć%2C%20chcę%20dowiedzieć%20się%20więcej%20o%20planie%20Pro."
+                  className="block w-full py-3.5 rounded-xl bg-black text-white font-bold text-center hover:bg-[#1a1a1a] transition-colors"
+                >
+                  Przejdź na Pro — napisz do nas
+                </a>
               </div>
             )}
 

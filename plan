@@ -1,46 +1,80 @@
-Mam pełny obraz. Oto lista rzeczy, które bym zrobił przed wypuszczeniem do testów — posortowana priorytetem:                                                                                                                                                                                                         
-                                                           
-  ---                                                                                                                                                                                                                                                                                                                  
-  Must-have (blokujące)                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                       
-  1. Wyłącz devConfig.showTokenUsage                                                                                                                                                                                                                                                                                   
-  lib/devConfig.ts ma showTokenUsage: true — użytkownicy widzą koszty tokenów Gemini. Zmień na false.                                                                                                                                                                                                                  
-                                                                                                                                                                                                                                                                                                                       
-  2. Reset hasła                                                                                                                                                                                                                                                                                                       
-  Strona logowania nie ma linka "Zapomniałem hasła". Bez tego każdy kto zapomni hasła = utracony user.                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                                       
-  3. Strony prawne (Regulamin / Prywatność / Kontakt)                                                                                                                                                                                                                                                                  
-  Footer ma href="#" na wszystkich trzech linkach. W Polsce RODO wymaga dostępnej polityki prywatności — bez tego aplikacja zbierająca e-maile jest niezgodna z prawem. Przynajmniej stub z minimalną treścią.                                                                                                         
-                                                                                                                                                                                                                                                                                                                       
-  4. Middleware dla /app                                                                                                                                                                                                                                                                                               
-  Redirect do loginu jest tylko po stronie klienta (useEffect → router.push). Przed SSR brak ochrony. Potrzebny middleware.ts z Supabase session check, żeby serwer nie serwował strony nieautoryzowanym.                                                                                                              
-                                                                                                                                                                                                                                                                                                                       
-  ---                                                                                                                                                                                                                                                                                                                
-  Ważne (do testów z ludźmi)                                                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                                       
-  5. Przycisk "Przejdź na Pro" (app/app/page.tsx:141)
-  Widoczny gdy limit wyczerpany, ale nie ma href ani onClick — <button> bez akcji. Minimum: link do formularza waitlisty albo maila.                                                                                                                                                                                   
-                                                                                                                                                                                                                                                                                                                       
-  6. Font Satoshi                                                                                                                                                                                                                                                                                                      
-  layout.tsx ładuje Geist przez next/font/google, ale wszystkie komponenty stylują się na 'Satoshi', ui-sans-serif — font faktycznie nie jest ładowany. Albo zamień na Geist w CSS, albo dodaj Satoshi przez CDN/next/font.                                                                                            
-                                                                                                                                                                                                                                                                                                                       
-  7. OG tags do udostępniania
-  metadata w layout.tsx nie ma openGraph ani twitter. Gdy ktoś wrzuci link na Slacka/Facebooka — brak podglądu.                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                                       
-  8. lang="en" w HTML
-  layout.tsx:28 ma lang="en" a aplikacja jest po polsku. Zmień na lang="pl".                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                                       
-  ---
-  Nice to have (po wypuszczeniu)                                                                                                                                                                                                                                                                                       
-                                                                                                                                                                                                                                                                                                                     
-  9. Analityki
-  Żadnego trackowania — nie dowiesz się ilu userów dotarło do demo, ilu zarejestrowało, gdzie odpada. Plausible lub PostHog (self-hosted) to minimum do senownego testowania.                                                                                                                                          
-                                                                                                                                                                                                                                                                                                                       
-  10. In-memory rate limit demo route                                                                                                                                                                                                                                                                                  
-  analyze-demo/route.ts trzyma limity IP w pamięci serwera — resetuje się przy każdym restarcie/deploymencie. Na Vercelu każdy cold start = czysty licznik. Dla testów to wystarczy, ale warto wiedzieć.                                                                                                               
-                                                                                                                                                                                                                                                                                                                       
-  11. Formularz waitlisty dla Pro                                                                                                                                                                                                                                                                                      
-  Cennik mówi "WKRÓTCE" — warto zbierać e-maile zainteresowanych. Nawet prosty input + zapis do Supabase.                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                                       
-  ---                                                                                                                                                                                                                                                                                                                  
-  Zacząć od 1–4 — to są rzeczy, które albo łamią prawo, albo skutkują tym że tester nie może w ogóle korzystać z aplikacji po zapomnieniu hasła. Chcesz żebym zrobił któreś z nich?  
+Mam pełny obraz. Oto lista rzeczy, które bym zrobił przed wypuszczeniem do testów — posortowana priorytetem:
+
+---
+
+Must-have (blokujące)
+
+1. Wyłącz devConfig.showTokenUsage  
+   lib/devConfig.ts ma showTokenUsage: true — użytkownicy widzą koszty tokenów Gemini. Zmień na false.
+
+---
+
+Ważne (do testów z ludźmi) 6. OG tags do udostępniania
+metadata w layout.tsx nie ma openGraph ani twitter. Gdy ktoś wrzuci link na Slacka/Facebooka — brak podglądu.
+
+---
+
+Nice to have (po wypuszczeniu)
+
+9. Analityki
+   Żadnego trackowania — nie dowiesz się ilu userów dotarło do demo, ilu zarejestrowało, gdzie odpada. Plausible lub PostHog (self-hosted) to minimum do senownego testowania.
+
+10. In-memory rate limit demo route  
+    analyze-demo/route.ts trzyma limity IP w pamięci serwera — resetuje się przy każdym restarcie/deploymencie. Na Vercelu każdy cold start = czysty licznik. Dla testów to wystarczy, ale warto wiedzieć.
+
+11. Formularz waitlisty dla Pro  
+    Cennik mówi "WKRÓTCE" — warto zbierać e-maile
+    zainteresowanych. Nawet prosty input + zapis do Supabase.
+
+---
+
+Zacząć od 1–4 — to są rzeczy, które albo łamią prawo, albo skutkują tym że tester nie może w ogóle korzystać z aplikacji po zapomnieniu hasła. Chcesz żebym zrobił któreś z nich?
+
+Dobry moment żeby to zaplanować. Oto pełny plan w dwóch częściach:
+
+---
+
+Deployment — Vercel
+
+1. Zmienne środowiskowe do ustawienia w Vercel Dashboard:  
+   NEXT_PUBLIC_SUPABASE_URL  
+   NEXT_PUBLIC_SUPABASE_ANON_KEY  
+   GEMINI_API_KEY  
+   BETA_WHITELIST=email1@gmail.com,email2@gmail.com,email3@gmail.com  
+
+2. Supabase — po deploymencie:
+
+- Authentication → URL Configuration → Redirect URLs: dodać https://twojadomena.vercel.app/**
+- Authentication → Settings → wyłączyć "Enable email signup" — rejestracja wyłączona, konta tworzysz ręcznie w Dashboard dla testerów  
+
+
+---
+
+Whitelist — co trzeba zrobić w kodzie
+
+3. proxy.ts — po sprawdzeniu sesji, dodać check emaila:  
+   const whitelist = (process.env.BETA_WHITELIST ?? "").split(",").map(e => e.trim());  
+
+
+if (user && whitelist.length > 0 && !whitelist.includes(user.email ?? "")) {  
+ return NextResponse.redirect(new URL("/beta", request.url));  
+ }
+
+4. Nowa strona /beta — "Zamknięta beta, skontaktuj się z nami"
+5. Rozszerzyć matcher w proxy.ts żeby obejmował też /app i /historia (już jest) + ewentualnie przekierować zalogowanych poza-whitelist z każdej strony  
+
+
+---
+
+Kolejność roboty
+
+1. Strona /beta (prosta, 5 min)
+2. Logika whitelist w proxy.ts
+3. Deploy na Vercel + env vars
+4. Supabase: wyłączyć signup + dodać redirect URL
+5. Ręcznie stworzyć konta testerów w Supabase Dashboard  
+
+
+---
+
+Zaczynamy? Mogę od razu zrobić kroki 1–2 (kod), a deploy i Supabase config to po Twojej stronie (kilka kliknięć). Powiedz tylko czy whitelist ma blokować dostęp do całej strony łącznie z landingiem, czy tylko do /app i /historia.

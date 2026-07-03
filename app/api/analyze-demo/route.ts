@@ -12,7 +12,7 @@ function checkRateLimit(ip: string): boolean {
     ipLimits.set(ip, { count: 1, resetAt: now + 24 * 60 * 60 * 1000 });
     return true;
   }
-  if (entry.count >= 3) return false;
+  if (entry.count >= 1) return false;
   entry.count++;
   return true;
 }
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          "Przekroczono limit demo (3 analizy dziennie). Zarejestruj się, aby analizować bez ograniczeń.",
+          "Wykorzystałeś bezpłatną analizę demo. Zarejestruj się, aby otrzymać 3 analizy miesięcznie.",
         limitReached: true,
       },
       { status: 429 },
