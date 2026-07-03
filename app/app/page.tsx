@@ -100,7 +100,6 @@ export default function AppPage() {
   return (
     <div
       className="flex h-screen bg-[#FAFAF7] text-[#0A0A0A] overflow-hidden"
-      style={{ fontFamily: "'Satoshi', ui-sans-serif, system-ui, sans-serif" }}
     >
       <AppSidebar
         user={user}
@@ -121,7 +120,7 @@ export default function AppPage() {
               <path d="M3 5h14M3 10h14M3 15h14" stroke="#0A0A0A" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
-          <span className="font-bold text-[17px] tracking-tight">Wydmuszka</span>
+          <span className="font-bold text-[17px] tracking-tight">Analyss</span>
         </div>
 
         {/* Content */}

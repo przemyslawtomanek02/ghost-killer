@@ -4,12 +4,12 @@ import { useState } from "react";
 
 const faqs = [
   {
-    q: "Czy Wydmuszka na pewno wykryje wszystkie ghost joby?",
+    q: "Czy Analyss na pewno wykryje wszystkie ghost joby?",
     a: "Nie ma stuprocentowej metody, ale nasza analiza 6 kryteriów wykrywa większość klasycznych wzorców. Traktuj wynik jak drugą opinię, nie wyrocznię.",
   },
   {
     q: "Skąd dane o firmie i LinkedIn?",
-    a: "Te dane podajesz sam w formularzu (opcjonalnie). Wydmuszka nie skanuje LinkedIna automatycznie — respektujemy prywatność i regulaminy platform.",
+    a: "Te dane podajesz sam w formularzu (opcjonalnie). Analyss nie skanuje LinkedIna automatycznie — respektujemy prywatność i regulaminy platform.",
   },
   {
     q: "Czy moje dane są bezpieczne?",

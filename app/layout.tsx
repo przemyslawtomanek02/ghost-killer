@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Wydmuszka – sprawdź czy oferta pracy to ghost job",
+  title: "Analyss – sprawdź czy oferta pracy to ghost job",
   description:
-    "Wklej ogłoszenie o pracę i dowiedz się w kilka sekund, czy to autentyczna rekrutacja czy wydmuszka. AI analizuje 6 sygnałów.",
+    "Wklej ogłoszenie o pracę i dowiedz się w kilka sekund, czy to autentyczna rekrutacja czy ghost job. AI analizuje 6 sygnałów.",
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="pl"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

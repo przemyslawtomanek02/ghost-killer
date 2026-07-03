@@ -96,10 +96,13 @@ export default function AppSidebar({
         {/* Logo */}
         <div className="px-5 py-5 border-b border-[#ECEAE3] shrink-0">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-[9px] bg-black text-white flex items-center justify-center font-black text-[17px]">
-              W
+            <div
+              className="w-8 h-8 rounded-[9px] text-white flex items-center justify-center font-black text-[17px]"
+              style={{ background: "linear-gradient(135deg, #7C6FE8, #F27C5E)" }}
+            >
+              A
             </div>
-            <span className="font-bold text-[19px] tracking-tight">Wydmuszka</span>
+            <span className="font-bold text-[19px] tracking-tight">Analyss</span>
           </Link>
         </div>
 

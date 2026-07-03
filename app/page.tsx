@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
 import LiveDemo from "@/app/_components/LiveDemo";
 import FaqAccordion from "@/app/_components/FaqAccordion";
 
@@ -11,10 +11,13 @@ import FaqAccordion from "@/app/_components/FaqAccordion";
 function Logo() {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="w-8 h-8 rounded-[9px] bg-black text-white flex items-center justify-center font-black text-[17px]">
-        W
+      <div
+        className="w-8 h-8 rounded-[9px] text-white flex items-center justify-center font-black text-[17px]"
+        style={{ background: "linear-gradient(135deg, #7C6FE8, #F27C5E)" }}
+      >
+        A
       </div>
-      <span className="font-bold text-[19px] tracking-tight">Wydmuszka</span>
+      <span className="font-bold text-[19px] tracking-tight">Analyss</span>
     </div>
   );
 }
@@ -315,7 +318,7 @@ function Hero() {
         </h1>
 
         <p className="text-[18px] text-[#57564F] leading-relaxed max-w-[540px] mx-auto mb-10">
-          Wydmuszka analizuje ogłoszenia w kilka sekund i mówi Ci wprost — warto
+          Analyss analizuje ogłoszenia w kilka sekund i mówi Ci wprost — warto
           aplikować czy to strata czasu.
         </p>
 
@@ -478,7 +481,7 @@ function DemoSection() {
             Sprawdź teraz — bez rejestracji
           </h2>
           <p className="text-[16px] text-[#57564F] max-w-md mx-auto">
-            Wklej treść ogłoszenia i zobacz jak działa Wydmuszka
+            Wklej treść ogłoszenia i zobacz jak działa Analyss
           </p>
         </div>
         <LiveDemo />
@@ -637,7 +640,7 @@ function Features() {
               className="w-4 h-[1.5px] rounded-full inline-block"
               style={{ background: "var(--accent-purple)" }}
             />
-            Co potrafi Wydmuszka
+            Co potrafi Analyss
             <span
               className="w-4 h-[1.5px] rounded-full inline-block"
               style={{ background: "var(--accent-purple)" }}
@@ -1010,14 +1013,90 @@ function Footer() {
     >
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <Logo />
-        <p className="text-[13px] text-[#9C9B93]">© 2025 Wydmuszka</p>
+        <p className="text-[13px] text-[#9C9B93]">© 2025 Analyss</p>
         <nav className="flex items-center gap-5 text-[13px] text-[#6B6A63]">
-          <a href="#" className="hover:text-[#0A0A0A] transition-colors">Regulamin</a>
-          <a href="#" className="hover:text-[#0A0A0A] transition-colors">Prywatność</a>
-          <a href="#" className="hover:text-[#0A0A0A] transition-colors">Kontakt</a>
+          <Link href="/regulamin" className="hover:text-[#0A0A0A] transition-colors">Regulamin</Link>
+          <Link href="/prywatnosc" className="hover:text-[#0A0A0A] transition-colors">Prywatność</Link>
+          <a href="mailto:kontakt@analyss.pl" className="hover:text-[#0A0A0A] transition-colors">Kontakt</a>
         </nav>
       </div>
     </footer>
+  );
+}
+
+// ── Animated background ───────────────────────────────────────────────────────
+
+function AnimatedBackground() {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // Laggy spring — orby "gonią" kursor z opóźnieniem
+  const sx = useSpring(mouseX, { stiffness: 28, damping: 28, mass: 1 });
+  const sy = useSpring(mouseY, { stiffness: 28, damping: 28, mass: 1 });
+
+  // Każdy orb reaguje na myszkę z inną siłą i kierunkiem — efekt paralaksy
+  const o1x = useTransform(sx, (v) => v * 65);
+  const o1y = useTransform(sy, (v) => v * 50);
+  const o2x = useTransform(sx, (v) => v * -50);
+  const o2y = useTransform(sy, (v) => v * -40);
+  const o3x = useTransform(sx, (v) => v * 38);
+  const o3y = useTransform(sy, (v) => v * 55);
+  const o4x = useTransform(sx, (v) => v * -60);
+  const o4y = useTransform(sy, (v) => v * 42);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      mouseX.set((e.clientX / window.innerWidth) - 0.5);
+      mouseY.set((e.clientY / window.innerHeight) - 0.5);
+    };
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
+  }, [mouseX, mouseY]);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+
+      {/* Orb 1 — purple, top-left */}
+      <motion.div className="absolute" style={{ x: o1x, y: o1y, top: "-420px", left: "-380px" }}>
+        <motion.div
+          className="rounded-full"
+          style={{ width: 1100, height: 1100, background: "radial-gradient(circle, rgba(124,111,232,0.14) 0%, transparent 60%)" }}
+          animate={{ x: [0, 120, -60, 0], y: [0, 90, -70, 0] }}
+          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </motion.div>
+
+      {/* Orb 2 — coral, top-right */}
+      <motion.div className="absolute" style={{ x: o2x, y: o2y, top: "-180px", right: "-320px" }}>
+        <motion.div
+          className="rounded-full"
+          style={{ width: 900, height: 900, background: "radial-gradient(circle, rgba(242,124,94,0.12) 0%, transparent 60%)" }}
+          animate={{ x: [0, -90, 55, 0], y: [0, 110, -80, 0] }}
+          transition={{ duration: 26, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+        />
+      </motion.div>
+
+      {/* Orb 3 — lime, mid-page */}
+      <motion.div className="absolute" style={{ x: o3x, y: o3y, top: "38%", left: "22%" }}>
+        <motion.div
+          className="rounded-full"
+          style={{ width: 750, height: 750, background: "radial-gradient(circle, rgba(232,244,214,0.35) 0%, transparent 60%)" }}
+          animate={{ x: [0, 70, -80, 0], y: [0, -70, 90, 0] }}
+          transition={{ duration: 36, repeat: Infinity, ease: "easeInOut", delay: 9 }}
+        />
+      </motion.div>
+
+      {/* Orb 4 — purple, bottom-right */}
+      <motion.div className="absolute" style={{ x: o4x, y: o4y, bottom: "8%", right: "-280px" }}>
+        <motion.div
+          className="rounded-full"
+          style={{ width: 950, height: 950, background: "radial-gradient(circle, rgba(124,111,232,0.09) 0%, transparent 60%)" }}
+          animate={{ x: [0, -110, 65, 0], y: [0, -65, 85, 0] }}
+          transition={{ duration: 32, repeat: Infinity, ease: "easeInOut", delay: 14 }}
+        />
+      </motion.div>
+
+    </div>
   );
 }
 
@@ -1025,10 +1104,8 @@ function Footer() {
 
 export default function LandingPage() {
   return (
-    <div
-      className="bg-[#F1F0EE] text-[#0A0A0A] overflow-x-hidden pt-20"
-      style={{ fontFamily: "'Satoshi', ui-sans-serif, system-ui, sans-serif" }}
-    >
+    <div className="relative bg-[#F1F0EE] text-[#0A0A0A] overflow-x-hidden pt-20 dot-grid">
+      <AnimatedBackground />
       <Nav />
       <Hero />
       <Stats />

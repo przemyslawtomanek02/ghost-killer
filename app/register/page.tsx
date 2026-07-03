@@ -74,14 +74,16 @@ export default function RegisterPage() {
     return (
       <div
         className="min-h-screen bg-[#FAFAF7] text-[#0A0A0A] flex flex-col"
-        style={{ fontFamily: "'Satoshi', ui-sans-serif, system-ui, sans-serif" }}
       >
         <nav className="max-w-6xl mx-auto w-full px-6 py-5 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-[9px] bg-black text-white flex items-center justify-center font-black text-[17px]">
-              W
+            <div
+              className="w-8 h-8 rounded-[9px] text-white flex items-center justify-center font-black text-[17px]"
+              style={{ background: "linear-gradient(135deg, #7C6FE8, #F27C5E)" }}
+            >
+              A
             </div>
-            <span className="font-bold text-[19px] tracking-tight">Wydmuszka</span>
+            <span className="font-bold text-[19px] tracking-tight">Analyss</span>
           </Link>
         </nav>
 
@@ -110,15 +112,17 @@ export default function RegisterPage() {
   return (
     <div
       className="min-h-screen bg-[#FAFAF7] text-[#0A0A0A] flex flex-col"
-      style={{ fontFamily: "'Satoshi', ui-sans-serif, system-ui, sans-serif" }}
     >
       {/* Nav */}
       <nav className="max-w-6xl mx-auto w-full px-6 py-5 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-[9px] bg-black text-white flex items-center justify-center font-black text-[17px]">
-            W
+          <div
+            className="w-8 h-8 rounded-[9px] text-white flex items-center justify-center font-black text-[17px]"
+            style={{ background: "linear-gradient(135deg, #7C6FE8, #F27C5E)" }}
+          >
+            A
           </div>
-          <span className="font-bold text-[19px] tracking-tight">Wydmuszka</span>
+          <span className="font-bold text-[19px] tracking-tight">Analyss</span>
         </Link>
         <Link
           href="/login"

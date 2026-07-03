@@ -82,7 +82,6 @@ export default function AnalysisDetailPage() {
   return (
     <div
       className="flex h-screen bg-[#FAFAF7] text-[#0A0A0A] overflow-hidden"
-      style={{ fontFamily: "'Satoshi', ui-sans-serif, system-ui, sans-serif" }}
     >
       <AppSidebar
         user={user}
