@@ -27,12 +27,16 @@ export default function AdminPage() {
   const [grandTotalTokens, setGrandTotalTokens] = useState(0);
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
+  const [yourEmail, setYourEmail] = useState<string | null>(null);
   const [blocking, setBlocking] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin")
       .then((r) => {
-        if (r.status === 403) { setForbidden(true); setLoading(false); return null; }
+        if (r.status === 403) {
+          r.json().then((d) => setYourEmail(d.yourEmail ?? null));
+          setForbidden(true); setLoading(false); return null;
+        }
         return r.json();
       })
       .then((data) => {
@@ -61,7 +65,15 @@ export default function AdminPage() {
   if (forbidden) {
     return (
       <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
-        <p className="text-[#57564F] font-medium">Brak dostępu.</p>
+        <div className="text-center">
+          <p className="text-[#57564F] font-medium mb-2">Brak dostępu.</p>
+          {yourEmail && (
+            <p className="text-[13px] text-[#9C9B93]">
+              Twój email: <span className="font-mono font-bold text-[#0A0A0A]">{yourEmail}</span>
+            </p>
+          )}
+          <p className="text-[12px] text-[#BFBDB6] mt-1">Upewnij się że ADMIN_EMAIL w Vercelu to dokładnie ten email.</p>
+        </div>
       </div>
     );
   }

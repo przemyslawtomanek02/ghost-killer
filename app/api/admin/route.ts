@@ -2,16 +2,20 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-async function checkAdmin(): Promise<boolean> {
+async function checkAdmin(): Promise<{ ok: boolean; email?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  return !!user && user.email === process.env.ADMIN_EMAIL;
+  if (!user?.email) return { ok: false };
+  const adminEmail = (process.env.ADMIN_EMAIL ?? "").trim().toLowerCase();
+  const userEmail = user.email.trim().toLowerCase();
+  return { ok: adminEmail !== "" && userEmail === adminEmail, email: user.email };
 }
 
 // GET /api/admin — statystyki wszystkich użytkowników
 export async function GET() {
-  if (!(await checkAdmin())) {
-    return NextResponse.json({ error: "Brak dostępu." }, { status: 403 });
+  const admin = await checkAdmin();
+  if (!admin.ok) {
+    return NextResponse.json({ error: "Brak dostępu.", yourEmail: admin.email ?? null }, { status: 403 });
   }
 
   const admin = createAdminClient();
@@ -65,7 +69,8 @@ export async function GET() {
 
 // PATCH /api/admin — blokuj / odblokuj użytkownika
 export async function PATCH(req: Request) {
-  if (!(await checkAdmin())) {
+  const admin = await checkAdmin();
+  if (!admin.ok) {
     return NextResponse.json({ error: "Brak dostępu." }, { status: 403 });
   }
 
