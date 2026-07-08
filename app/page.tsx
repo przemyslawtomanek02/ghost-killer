@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
+import { createClient } from "@/lib/supabase/client";
 import LiveDemo from "@/app/_components/LiveDemo";
 import FaqAccordion from "@/app/_components/FaqAccordion";
 
@@ -34,7 +36,21 @@ const glassStyle: React.CSSProperties = {
 };
 
 function Nav() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => {
+      if (data.user) setLoggedIn(true);
+    });
+  }, []);
+
+  async function logout() {
+    await createClient().auth.signOut();
+    setLoggedIn(false);
+    router.refresh();
+  }
 
   return (
     <header className="fixed top-4 left-0 right-0 z-50 px-4 md:px-6 pointer-events-none">
@@ -100,12 +116,25 @@ function Nav() {
 
             {/* Desktop auth */}
             <div className="hidden md:flex items-center gap-3">
-              <Link href="/login" className="text-[14px] font-medium text-[#57564F] hover:text-[#0A0A0A] transition-colors">
-                Zaloguj się
-              </Link>
-              <Link href="/register" className="text-[14px] font-semibold bg-black text-white rounded-full px-4 py-2 hover:bg-[#1a1a1a] transition-colors">
-                Wypróbuj za darmo
-              </Link>
+              {loggedIn ? (
+                <>
+                  <Link href="/app" className="text-[14px] font-semibold bg-black text-white rounded-full px-4 py-2 hover:bg-[#1a1a1a] transition-colors">
+                    Otwórz apkę
+                  </Link>
+                  <button onClick={logout} className="text-[14px] font-medium text-[#57564F] hover:text-[#0A0A0A] transition-colors">
+                    Wyloguj
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="text-[14px] font-medium text-[#57564F] hover:text-[#0A0A0A] transition-colors">
+                    Zaloguj się
+                  </Link>
+                  <Link href="/register" className="text-[14px] font-semibold bg-black text-white rounded-full px-4 py-2 hover:bg-[#1a1a1a] transition-colors">
+                    Wypróbuj za darmo
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Hamburger button — mobile only */}
@@ -163,20 +192,40 @@ function Nav() {
 
                 <div className="h-px bg-black/[0.07] mx-1 my-1" />
 
-                <Link
-                  href="/login"
-                  onClick={() => setOpen(false)}
-                  className="px-4 py-3 text-[15px] font-medium text-[#57564F] hover:text-[#0A0A0A] rounded-xl hover:bg-black/5 transition-colors"
-                >
-                  Zaloguj się
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setOpen(false)}
-                  className="mt-1 mx-1 px-4 py-3.5 rounded-xl bg-black text-white font-bold text-[15px] text-center hover:bg-[#1a1a1a] transition-colors"
-                >
-                  Wypróbuj za darmo →
-                </Link>
+                {loggedIn ? (
+                  <>
+                    <Link
+                      href="/app"
+                      onClick={() => setOpen(false)}
+                      className="mt-1 mx-1 px-4 py-3.5 rounded-xl bg-black text-white font-bold text-[15px] text-center hover:bg-[#1a1a1a] transition-colors"
+                    >
+                      Otwórz apkę →
+                    </Link>
+                    <button
+                      onClick={() => { setOpen(false); logout(); }}
+                      className="px-4 py-3 text-[15px] font-medium text-[#57564F] hover:text-[#0A0A0A] rounded-xl hover:bg-black/5 transition-colors text-left"
+                    >
+                      Wyloguj
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setOpen(false)}
+                      className="px-4 py-3 text-[15px] font-medium text-[#57564F] hover:text-[#0A0A0A] rounded-xl hover:bg-black/5 transition-colors"
+                    >
+                      Zaloguj się
+                    </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setOpen(false)}
+                      className="mt-1 mx-1 px-4 py-3.5 rounded-xl bg-black text-white font-bold text-[15px] text-center hover:bg-[#1a1a1a] transition-colors"
+                    >
+                      Wypróbuj za darmo →
+                    </Link>
+                  </>
+                )}
               </nav>
             </motion.div>
           )}
