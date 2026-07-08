@@ -20,7 +20,7 @@ const faqs = [
     a: "Plan Pro znosi limit za 29 zł/mies. Możesz zrezygnować w każdej chwili.",
   },
   {
-    q: "Kto stoi za Wydmuszką?",
+    q: "Kto stoi za Analyss?",
     a: "Niezależny polski projekt — narzędzie stworzone przez osoby, które same trafiały na ghost joby i miały dość.",
   },
 ];
@@ -31,24 +31,39 @@ export default function FaqAccordion() {
   return (
     <div className="flex flex-col gap-2">
       {faqs.map((item, i) => (
-        <div key={i} className="bg-white border border-[#ECEAE3] rounded-2xl overflow-hidden">
+        <div
+          key={i}
+          className="bg-white border border-[#ECEAE3] rounded-2xl overflow-hidden"
+        >
           <button
             onClick={() => setOpen(open === i ? null : i)}
             className="w-full flex items-center justify-between px-6 py-5 text-left gap-4"
           >
-            <span className="font-semibold text-[15px] text-[#0A0A0A]">{item.q}</span>
+            <span className="font-semibold text-[15px] text-[#0A0A0A]">
+              {item.q}
+            </span>
             <span
               className="shrink-0 text-[#6B6A63] transition-transform duration-200"
-              style={{ transform: open === i ? "rotate(180deg)" : "rotate(0deg)" }}
+              style={{
+                transform: open === i ? "rotate(180deg)" : "rotate(0deg)",
+              }}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M3 6l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M3 6l5 5 5-5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </span>
           </button>
           {open === i && (
             <div className="px-6 pb-5">
-              <p className="text-[14px] text-[#57564F] leading-relaxed">{item.a}</p>
+              <p className="text-[14px] text-[#57564F] leading-relaxed">
+                {item.a}
+              </p>
             </div>
           )}
         </div>
