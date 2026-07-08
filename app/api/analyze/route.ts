@@ -17,7 +17,21 @@ export async function POST(req: Request) {
     );
   }
 
-  // 2. limit freemium — liczymy analizy w tym miesiącu
+  // 2. sprawdź blokadę konta
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_blocked")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.is_blocked) {
+    return NextResponse.json(
+      { error: "Twoje konto zostało zablokowane.", blocked: true },
+      { status: 403 },
+    );
+  }
+
+  // 3. limit freemium — liczymy analizy w tym miesiącu
   const since = new Date();
   since.setDate(1);
   since.setHours(0, 0, 0, 0);
@@ -37,7 +51,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // 3. dane wejściowe
+  // 4. dane wejściowe
   const { jobText, company, ext } = await req.json();
   if (!jobText || !jobText.trim()) {
     return NextResponse.json(
@@ -46,7 +60,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // 4. wywołanie Gemini — klucz tylko po stronie serwera
+  // 5. wywołanie Gemini — klucz tylko po stronie serwera
   const prompt = buildPrompt(jobText, company, ext);
 
   async function callGemini(attempt = 1): Promise<Response> {
@@ -99,7 +113,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // 5. zapis analizy (do liczenia limitu i historii)
+  // 6. zapis analizy (do liczenia limitu i historii)
   const row = {
     user_id: user.id,
     verdict: result.verdict,
@@ -109,17 +123,14 @@ export async function POST(req: Request) {
     verdict_label: result.verdictLabel,
     summary: result.summary,
     criteria: result.criteria,
+    prompt_tokens: usage?.promptTokenCount ?? null,
+    response_tokens: usage?.candidatesTokenCount ?? null,
+    total_tokens: usage?.totalTokenCount ?? null,
   };
 
   const { error: insertErr } = await supabase.from("analyses").insert(row);
   if (insertErr) {
-    // Kolumna criteria może nie istnieć — spróbuj bez niej
-    console.error("INSERT error (retrying without criteria):", insertErr.message);
-    const { criteria: _, ...rowWithout } = row;
-    const { error: retryErr } = await supabase.from("analyses").insert(rowWithout);
-    if (retryErr) {
-      console.error("INSERT retry error:", retryErr.message);
-    }
+    console.error("INSERT error:", insertErr.message);
   }
 
   const response: Record<string, unknown> = {

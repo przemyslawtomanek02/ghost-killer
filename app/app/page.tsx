@@ -40,6 +40,7 @@ export default function AppPage() {
   const [tokenUsage, setTokenUsage] = useState<TokenUsage | null>(null);
   const [error, setError] = useState("");
   const [limitReached, setLimitReached] = useState(false);
+  const [blocked, setBlocked] = useState(false);
   const [usesLeft, setUsesLeft] = useState<number | null>(null);
 
   useEffect(() => {
@@ -92,6 +93,7 @@ export default function AppPage() {
 
     if (res.status === 401) { router.push("/login"); return; }
     if (res.status === 402) { setLimitReached(true); return; }
+    if (res.status === 403) { setBlocked(true); return; }
     if (!res.ok) { setError("Nie udało się przeanalizować. Spróbuj ponownie."); return; }
 
     const data = await res.json();
@@ -139,6 +141,13 @@ export default function AppPage() {
         {/* Content */}
         <div ref={mainRef} className="flex-1 overflow-y-auto">
           <div className="max-w-[720px] mx-auto px-5 py-10 pb-16">
+
+            {blocked && (
+              <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-3xl p-8 text-center mb-6">
+                <h2 className="text-2xl font-black tracking-tight mb-2 text-[#991B1B]">Konto zablokowane</h2>
+                <p className="text-[#7F1D1D]">Twoje konto zostało tymczasowo zablokowane. Skontaktuj się z nami: <a href="mailto:kontakt@analyss.pl" className="underline">kontakt@analyss.pl</a></p>
+              </div>
+            )}
 
             {limitReached && (
               <div className="bg-white border border-[#ECEAE3] rounded-3xl p-8 text-center mb-6">
