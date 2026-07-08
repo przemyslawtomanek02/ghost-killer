@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import AppSidebar from "@/app/components/AppSidebar";
 import type { Criterion } from "@/lib/analyze";
@@ -127,9 +128,9 @@ export default function AnalysisDetailPage() {
             {notFound && (
               <div className="bg-white border border-[#ECEAE3] rounded-3xl p-10 text-center">
                 <p className="text-[#57564F] mb-5">Nie znaleziono analizy.</p>
-                <a href="/historia" className="inline-block py-3 px-6 rounded-xl bg-black text-white font-bold text-[15px]">
+                <Link href="/historia" className="inline-block py-3 px-6 rounded-xl bg-black text-white font-bold text-[15px]">
                   Wróć do historii
-                </a>
+                </Link>
               </div>
             )}
 

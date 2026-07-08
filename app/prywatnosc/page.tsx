@@ -39,7 +39,7 @@ export default function PrywatnoPage() {
           <h2>1. Administrator danych</h2>
           <p>
             Administratorem Twoich danych osobowych jest osoba fizyczna prowadząca serwis
-            <strong> Analyss</strong> (dalej: „Administrator"), kontakt:{" "}
+            <strong> Analyss</strong> (dalej: &bdquo;Administrator&rdquo;), kontakt:{" "}
             <a href="mailto:kontakt@analyss.pl" className="text-[#0A0A0A] font-semibold underline underline-offset-2">
               kontakt@analyss.pl
             </a>.

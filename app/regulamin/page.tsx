@@ -39,8 +39,8 @@ export default function ReguaminPage() {
           <h2>§1 Postanowienia ogólne</h2>
           <p>
             Niniejszy Regulamin określa zasady korzystania z serwisu internetowego <strong>Analyss</strong>
-            {" "}dostępnego pod adresem analyss.pl (dalej: „Serwis"), prowadzonego przez osobę fizyczną
-            prowadzącą działalność na terenie Rzeczypospolitej Polskiej (dalej: „Operator").
+            {" "}dostępnego pod adresem analyss.pl (dalej: &bdquo;Serwis&rdquo;), prowadzonego przez osobę fizyczną
+            prowadzącą działalność na terenie Rzeczypospolitej Polskiej (dalej: &bdquo;Operator&rdquo;).
           </p>
           <p>
             Korzystanie z Serwisu oznacza akceptację niniejszego Regulaminu w całości.
@@ -50,7 +50,7 @@ export default function ReguaminPage() {
           <h2>§2 Opis usługi</h2>
           <p>
             Serwis Analyss umożliwia analizę ogłoszeń o pracę pod kątem cech charakterystycznych
-            dla tzw. „ghost jobów" — ofert publikowanych bez realnego procesu rekrutacyjnego.
+            dla tzw. &bdquo;ghost job&oacute;w&rdquo; &mdash; ofert publikowanych bez realnego procesu rekrutacyjnego.
             Analiza jest przeprowadzana przy użyciu modelu językowego (AI) i ma charakter
             <strong> wyłącznie informacyjny</strong>. Nie stanowi porady prawnej, zawodowej ani
             gwarancji co do charakteru danego ogłoszenia.

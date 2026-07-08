@@ -35,7 +35,7 @@ function UpdatePasswordForm() {
   useEffect(() => {
     // Supabase implicit flow — błąd wraca w query params
     if (searchParams.get("error")) {
-      setStatus("invalid");
+      setTimeout(() => setStatus("invalid"), 0);
       return;
     }
 

@@ -131,7 +131,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u, i) => (
+                  {users.map((u) => (
                     <tr
                       key={u.id}
                       className="border-b border-[#F2F0EA] last:border-0"
