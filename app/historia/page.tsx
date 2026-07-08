@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import AppSidebar from "@/app/components/AppSidebar";
 
@@ -113,7 +114,7 @@ export default function HistoriaPage() {
                 {analyses.map((a) => {
                   const vs = verdictStyle[a.verdict] ?? verdictStyle.warning;
                   return (
-                    <div key={a.id} className="bg-white border border-[#ECEAE3] rounded-2xl p-5">
+                    <Link key={a.id} href={`/historia/${a.id}`} className="block bg-white border border-[#ECEAE3] rounded-2xl p-5 hover:border-[#C9C7BF] transition-colors">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="min-w-0">
                           <div className="font-semibold text-[15px] truncate">
@@ -138,7 +139,7 @@ export default function HistoriaPage() {
                           {a.job_excerpt}…
                         </p>
                       )}
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
