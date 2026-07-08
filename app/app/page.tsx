@@ -76,7 +76,7 @@ export default function AppPage() {
   }
 
   async function analyze() {
-    if (!jobText.trim()) { setError("Wklej treść ogłoszenia."); return; }
+    if (jobText.trim().length < 80) { setError("Ogłoszenie jest za krótkie (min. 80 znaków)."); return; }
     setLoading(true);
     setError("");
     setResult(null);
@@ -286,10 +286,15 @@ export default function AppPage() {
                     placeholder="Wklej tutaj całą treść ogłoszenia o pracę..."
                     className="w-full min-h-[180px] border border-[#ECEAE3] rounded-xl px-4 py-3 text-[15px] leading-relaxed bg-[#FAFAF7] outline-none resize-y focus:border-[#9C9B93] transition-colors"
                   />
+                  {jobText.trim().length > 0 && jobText.trim().length < 80 && (
+                    <p className="text-[12px] text-[#9C9B93] mt-1.5">
+                      {jobText.trim().length} / 80 znaków minimum
+                    </p>
+                  )}
                   {error && <div className="text-red-600 text-sm mt-2.5">{error}</div>}
                   <button
                     onClick={analyze}
-                    disabled={loading}
+                    disabled={loading || jobText.trim().length < 80}
                     className="w-full mt-3.5 py-4 rounded-xl bg-black text-white font-bold text-base disabled:opacity-50 hover:bg-[#1a1a1a] transition-colors"
                   >
                     {loading ? "Analizuję..." : "Sprawdź ofertę →"}
