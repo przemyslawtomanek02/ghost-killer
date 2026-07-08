@@ -1,27 +1,12 @@
 import { NextResponse } from "next/server";
 import { buildPrompt } from "@/lib/analyze";
 
-// In-memory rate limiting: IP → { count, resetAt }
-// Prosta implementacja — bez Redis, reset co 24h
-const ipLimits = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = ipLimits.get(ip);
-  if (!entry || entry.resetAt < now) {
-    ipLimits.set(ip, { count: 1, resetAt: now + 24 * 60 * 60 * 1000 });
-    return true;
-  }
-  if (entry.count >= 1) return false;
-  entry.count++;
-  return true;
-}
-
 export async function POST(req: Request) {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  // Limit 1 demo per browser — cookie-based (działa na Vercel serverless)
+  const cookieHeader = req.headers.get("cookie") ?? "";
+  const demoUsed = cookieHeader.split(";").some((c) => c.trim().startsWith("demo_used=1"));
 
-  if (!checkRateLimit(ip)) {
+  if (demoUsed) {
     return NextResponse.json(
       {
         error:
@@ -107,10 +92,20 @@ export async function POST(req: Request) {
   }
 
   // Zwracamy tylko podstawowy werdykt — bez criteria, bez zapisu
-  return NextResponse.json({
+  const response = NextResponse.json({
     verdict: parsed.verdict,
     score: parsed.score,
     verdictLabel: parsed.verdictLabel,
     summary: parsed.summary,
   });
+
+  // Ustaw cookie na 24h — blokuje kolejne demo z tej przeglądarki
+  response.cookies.set("demo_used", "1", {
+    maxAge: 24 * 60 * 60,
+    httpOnly: true,
+    path: "/",
+    sameSite: "lax",
+  });
+
+  return response;
 }

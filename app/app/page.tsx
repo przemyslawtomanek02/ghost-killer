@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import AppSidebar from "@/app/components/AppSidebar";
 import devConfig from "@/lib/devConfig";
 import type { AnalysisResult } from "@/lib/analyze";
+import { FREE_LIMIT } from "@/lib/analyze";
 
 type TokenUsage = { promptTokens: number; responseTokens: number; totalTokens: number };
 
@@ -39,15 +40,26 @@ export default function AppPage() {
   const [tokenUsage, setTokenUsage] = useState<TokenUsage | null>(null);
   const [error, setError] = useState("");
   const [limitReached, setLimitReached] = useState(false);
+  const [usesLeft, setUsesLeft] = useState<number | null>(null);
 
   useEffect(() => {
-    createClient()
-      .auth.getUser()
-      .then(({ data }) => {
-        if (!data.user) { router.push("/login"); return; }
-        setAuthed(true);
-        setUser({ nickname: data.user.user_metadata?.nickname, email: data.user.email });
-      });
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) { router.push("/login"); return; }
+      setAuthed(true);
+      setUser({ nickname: data.user.user_metadata?.nickname, email: data.user.email });
+
+      // Pobierz liczbę analiz w tym miesiącu
+      const since = new Date();
+      since.setDate(1);
+      since.setHours(0, 0, 0, 0);
+      const { count } = await supabase
+        .from("analyses")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", data.user.id)
+        .gte("created_at", since.toISOString());
+      setUsesLeft(FREE_LIMIT - (count ?? 0));
+    });
   }, [router]);
 
   function resetAnalysis() {
@@ -85,6 +97,7 @@ export default function AppPage() {
     const data = await res.json();
     setResult(data.result);
     setTokenUsage(data.tokenUsage ?? null);
+    setUsesLeft(data.usesLeft ?? null);
     setRefreshKey((k) => k + 1); // odśwież listę w sidebarze
     setTimeout(() => mainRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 50);
   }
@@ -281,6 +294,13 @@ export default function AppPage() {
                   >
                     {loading ? "Analizuję..." : "Sprawdź ofertę →"}
                   </button>
+                  {usesLeft !== null && (
+                    <p className="text-center text-[12px] text-[#9C9B93] mt-2.5">
+                      {usesLeft > 0
+                        ? `Pozostało ${usesLeft} z ${FREE_LIMIT} darmowych analiz w tym miesiącu`
+                        : "Wykorzystano wszystkie darmowe analizy w tym miesiącu"}
+                    </p>
+                  )}
                 </div>
               </>
             )}

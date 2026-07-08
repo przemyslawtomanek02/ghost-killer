@@ -113,7 +113,7 @@ export default function LiveDemo() {
           <div className="text-[40px] mb-3">🚧</div>
           <h3 className="text-[20px] font-black tracking-tight mb-2">Limit demo wyczerpany</h3>
           <p className="text-[#57564F] text-[15px] mb-6 leading-relaxed">
-            Wykorzystałeś 3 darmowe analizy demo dzisiaj. Zarejestruj się, żeby analizować bez ograniczeń — z historią i pełnym rozbiciem na 6 kryteriów.
+            Wykorzystałeś bezpłatną analizę demo. Zarejestruj się, żeby analizować bez ograniczeń — z historią i pełnym rozbiciem na 6 kryteriów.
           </p>
           <Link
             href="/register"
@@ -268,7 +268,7 @@ export default function LiveDemo() {
           </button>
 
           <p className="text-center text-[12px] text-[#9C9B93] mt-3">
-            Demo · 3 analizy dziennie bez rejestracji
+            Demo · 1 analiza dziennie bez rejestracji
           </p>
         </div>
       </div>
