@@ -13,21 +13,21 @@ async function checkAdmin(): Promise<{ ok: boolean; email?: string }> {
 
 // GET /api/admin — statystyki wszystkich użytkowników
 export async function GET() {
-  const admin = await checkAdmin();
-  if (!admin.ok) {
-    return NextResponse.json({ error: "Brak dostępu.", yourEmail: admin.email ?? null }, { status: 403 });
+  const auth = await checkAdmin();
+  if (!auth.ok) {
+    return NextResponse.json({ error: "Brak dostępu.", yourEmail: auth.email ?? null }, { status: 403 });
   }
 
-  const admin = createAdminClient();
+  const adminDb = createAdminClient();
 
   const [
     { data: { users } },
     { data: profiles },
     { data: analyses },
   ] = await Promise.all([
-    admin.auth.admin.listUsers({ perPage: 1000 }),
-    admin.from("profiles").select("id, nickname, is_blocked, created_at"),
-    admin.from("analyses").select("user_id, total_tokens, created_at"),
+    adminDb.auth.admin.listUsers({ perPage: 1000 }),
+    adminDb.from("profiles").select("id, nickname, is_blocked, created_at"),
+    adminDb.from("analyses").select("user_id, total_tokens, created_at"),
   ]);
 
   const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
@@ -69,8 +69,8 @@ export async function GET() {
 
 // PATCH /api/admin — blokuj / odblokuj użytkownika
 export async function PATCH(req: Request) {
-  const admin = await checkAdmin();
-  if (!admin.ok) {
+  const auth = await checkAdmin();
+  if (!auth.ok) {
     return NextResponse.json({ error: "Brak dostępu." }, { status: 403 });
   }
 
@@ -79,8 +79,8 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Nieprawidłowe dane." }, { status: 400 });
   }
 
-  const admin = createAdminClient();
-  const { error } = await admin
+  const adminDb = createAdminClient();
+  const { error } = await adminDb
     .from("profiles")
     .update({ is_blocked })
     .eq("id", userId);
