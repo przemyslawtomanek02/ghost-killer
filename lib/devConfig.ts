@@ -1,7 +1,7 @@
 // Flagi deweloperskie — przełączaj true/false
 const devConfig = {
   /** Pokaż zużycie tokenów Gemini po każdej analizie */
-  showTokenUsage: true,
+  showTokenUsage: false,
 } as const;
 
 export default devConfig;
