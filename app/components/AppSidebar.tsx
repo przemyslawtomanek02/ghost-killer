@@ -74,6 +74,7 @@ export default function AppSidebar({
 
   const isApp = pathname === "/app";
   const isHistoria = pathname === "/historia";
+  const isCv = pathname === "/cv";
 
   return (
     <>
@@ -145,6 +146,23 @@ export default function AppSidebar({
                 <rect x="2" y="11" width="6" height="2" rx="1" fill="currentColor" />
               </svg>
               Historia analiz
+            </Link>
+
+            <Link
+              href="/cv"
+              onClick={() => setSidebarOpen(false)}
+              className={`
+                flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-[14px] transition-colors
+                ${isCv
+                  ? "bg-[#F5F4EF] text-[#0A0A0A] font-semibold"
+                  : "text-[#57564F] hover:bg-[#F5F4EF] hover:text-[#0A0A0A]"}
+              `}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="1" width="12" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                <path d="M5 5h6M5 8h6M5 11h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              Skaner CV
             </Link>
           </div>
 
