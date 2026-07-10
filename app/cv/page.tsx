@@ -107,6 +107,36 @@ function SectionCard({
   );
 }
 
+function InfoCard({
+  title, status, ok, children,
+}: {
+  title: string;
+  status: "ok" | "warn" | "neutral";
+  ok?: string;
+  children?: React.ReactNode;
+}) {
+  const styles = {
+    ok: { border: "border-[#BBF7D0]", bg: "bg-[#F0FDF4]", dot: "bg-[#16A34A]" },
+    warn: { border: "border-[#FDE68A]", bg: "bg-[#FFFBEB]", dot: "bg-[#D97706]" },
+    neutral: { border: "border-[#ECEAE3]", bg: "bg-white", dot: "bg-[#9C9B93]" },
+  }[status];
+
+  return (
+    <div className={`border ${styles.border} ${styles.bg} rounded-2xl p-5`}>
+      <div className="flex items-center gap-2 mb-3">
+        <div className={`w-2 h-2 rounded-full shrink-0 ${styles.dot}`} />
+        <span className="text-[13px] font-semibold text-[#0A0A0A]">{title}</span>
+      </div>
+      {ok && status === "ok" && !children ? (
+        <p className="text-[12px] text-[#166534]">{ok}</p>
+      ) : (
+        children
+      )}
+      {ok && status === "ok" && children}
+    </div>
+  );
+}
+
 function Tag({ label, variant }: { label: string; variant: "green" | "red" | "neutral" }) {
   const styles = {
     green: "bg-[#F0FDF4] text-[#166534] border-[#BBF7D0]",
@@ -401,7 +431,7 @@ export default function CvPage() {
                 </div>
               </div>
 
-              {/* Category cards */}
+              {/* ── Scored categories ────────────────────────────────── */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Keywords */}
                 <SectionCard
@@ -444,11 +474,7 @@ export default function CvPage() {
                 </SectionCard>
 
                 {/* Structure */}
-                <SectionCard
-                  title="Struktura CV"
-                  score={result.sections.structure.score}
-                  max={result.sections.structure.max}
-                >
+                <SectionCard title="Struktura CV" score={result.sections.structure.score} max={result.sections.structure.max}>
                   {result.sections.structure.foundSections.length > 0 && (
                     <div className="mb-2">
                       <p className="text-[11px] text-[#9C9B93] font-medium mb-1.5">Znalezione sekcje</p>
@@ -476,11 +502,7 @@ export default function CvPage() {
                 </SectionCard>
 
                 {/* ATS */}
-                <SectionCard
-                  title="Kompatybilność ATS"
-                  score={result.sections.ats.score}
-                  max={result.sections.ats.max}
-                >
+                <SectionCard title="Kompatybilność ATS" score={result.sections.ats.score} max={result.sections.ats.max}>
                   {result.sections.ats.issues.length === 0 ? (
                     <p className="text-[12px] text-[#166534]">Brak problemów z formatem — świetnie!</p>
                   ) : (
@@ -496,29 +518,16 @@ export default function CvPage() {
                 </SectionCard>
 
                 <div className="flex flex-col gap-3">
-                  {/* Achievements */}
-                  <SectionCard
-                    title="Mierzalne osiągnięcia"
-                    score={result.sections.achievements.score}
-                    max={result.sections.achievements.max}
-                  >
+                  <SectionCard title="Mierzalne osiągnięcia" score={result.sections.achievements.score} max={result.sections.achievements.max}>
                     <p className="text-[12px] text-[#57564F]">
                       {result.sections.achievements.count === 0
                         ? "Nie znaleziono liczb ani procentów — dodaj konkretne wyniki."
                         : `Wykryto ${result.sections.achievements.count} wartości liczbowych (%, tys., mln...).`}
                     </p>
                   </SectionCard>
-
-                  {/* Action verbs */}
-                  <SectionCard
-                    title="Słowa akcji"
-                    score={result.sections.actionVerbs.score}
-                    max={result.sections.actionVerbs.max}
-                  >
+                  <SectionCard title="Słowa akcji" score={result.sections.actionVerbs.score} max={result.sections.actionVerbs.max}>
                     {result.sections.actionVerbs.found.length === 0 ? (
-                      <p className="text-[12px] text-[#57564F]">
-                        Brak słów akcji — zacznij opisy obowiązków od czasowników.
-                      </p>
+                      <p className="text-[12px] text-[#57564F]">Brak słów akcji — zacznij opisy obowiązków od czasowników.</p>
                     ) : (
                       <div className="flex flex-wrap gap-1">
                         {result.sections.actionVerbs.found.map((v) => (
@@ -528,6 +537,135 @@ export default function CvPage() {
                     )}
                   </SectionCard>
                 </div>
+              </div>
+
+              {/* ── Informational checks ─────────────────────────────── */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                {/* Buzzwords */}
+                <InfoCard
+                  title="Klisze i buzzwordy"
+                  status={result.sections.buzzwords.found.length === 0 ? "ok" : "warn"}
+                  ok={result.sections.buzzwords.found.length === 0 ? "Brak okrągłych sformułowań — dobrze!" : undefined}
+                >
+                  {result.sections.buzzwords.found.length > 0 && (
+                    <>
+                      <p className="text-[12px] text-[#92400E] mb-2">
+                        Rekruterzy i ATS negatywnie oceniają te frazy. Zastąp je konkretnymi osiągnięciami.
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {result.sections.buzzwords.found.map((b) => (
+                          <Tag key={b} label={b} variant="red" />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </InfoCard>
+
+                {/* Online presence */}
+                <InfoCard
+                  title="Obecność online"
+                  status={result.sections.onlinePresence.linkedin ? "ok" : "warn"}
+                >
+                  <div className="flex flex-col gap-1.5">
+                    {[
+                      { label: "LinkedIn", ok: result.sections.onlinePresence.linkedin, tip: "Rekruterzy zawsze sprawdzają profil" },
+                      { label: "GitHub / Portfolio", ok: result.sections.onlinePresence.github || result.sections.onlinePresence.portfolio, tip: "Ważne szczególnie w IT i designie" },
+                      { label: "Telefon z kierunkowym (+48)", ok: result.sections.onlinePresence.phoneInternational, tip: "Wymagane przy rekrutacjach zagranicznych" },
+                    ].map(({ label, ok, tip }) => (
+                      <div key={label} className="flex items-start gap-2">
+                        <span className={`text-[12px] mt-0.5 shrink-0 ${ok ? "text-[#16A34A]" : "text-[#DC2626]"}`}>
+                          {ok ? "✓" : "✗"}
+                        </span>
+                        <div>
+                          <span className="text-[12px] font-medium text-[#0A0A0A]">{label}</span>
+                          {!ok && <span className="text-[11px] text-[#9C9B93] ml-1">— {tip}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </InfoCard>
+
+                {/* Languages */}
+                <InfoCard
+                  title="Języki obce"
+                  status={!result.sections.languages.hasSection ? "warn" : result.sections.languages.hasStandardLevels ? "ok" : "warn"}
+                >
+                  {!result.sections.languages.hasSection ? (
+                    <p className="text-[12px] text-[#92400E]">
+                      Brak sekcji językowej — dodaj ją z poziomami wg skali CEFR (A1–C2).
+                    </p>
+                  ) : (
+                    <div className="flex flex-col gap-1.5">
+                      {result.sections.languages.detected.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-1">
+                          {result.sections.languages.detected.map((l) => (
+                            <Tag key={l} label={l} variant="neutral" />
+                          ))}
+                        </div>
+                      )}
+                      {!result.sections.languages.hasStandardLevels && (
+                        <p className="text-[12px] text-[#92400E]">
+                          Podaj poziom wg skali CEFR (A1–C2) lub opisowo (native, fluent, communicative).
+                        </p>
+                      )}
+                      {result.sections.languages.hasStandardLevels && (
+                        <p className="text-[12px] text-[#166534]">Poziomy języków podane poprawnie.</p>
+                      )}
+                    </div>
+                  )}
+                </InfoCard>
+
+                {/* Certifications */}
+                <InfoCard
+                  title="Certyfikaty"
+                  status={result.sections.certifications.found.length > 0 ? "ok" : "neutral"}
+                >
+                  {result.sections.certifications.found.length === 0 ? (
+                    <p className="text-[12px] text-[#9C9B93]">
+                      Nie wykryto znanych certyfikatów (AWS, Azure, PMP, Scrum, ISTQB...). Jeśli je posiadasz — dodaj do CV.
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1">
+                      {result.sections.certifications.found.map((c) => (
+                        <Tag key={c} label={c} variant="green" />
+                      ))}
+                    </div>
+                  )}
+                </InfoCard>
+
+                {/* Readability */}
+                <InfoCard
+                  title="Czytelność zdań"
+                  status={result.sections.readability.verdict === "good" ? "ok" : result.sections.readability.verdict === "ok" ? "neutral" : "warn"}
+                >
+                  <p className="text-[12px] text-[#57564F]">
+                    Średnia długość zdania: <strong className="text-[#0A0A0A]">{result.sections.readability.avgWordsPerSentence} słów</strong>
+                    {result.sections.readability.verdict === "good" && " — świetnie, krótkie zdania są łatwiejsze do parsowania."}
+                    {result.sections.readability.verdict === "ok" && " — w porządku, choć warto skracać złożone punkty."}
+                    {result.sections.readability.verdict === "complex" && " — za długie. Skróć zdania do maks. 18–20 słów."}
+                  </p>
+                </InfoCard>
+
+                {/* Career gaps */}
+                <InfoCard
+                  title="Luki w historii zatrudnienia"
+                  status={result.sections.careerGaps.detected ? "warn" : "ok"}
+                  ok={!result.sections.careerGaps.detected ? "Brak wykrytych luk — historia ciągła." : undefined}
+                >
+                  {result.sections.careerGaps.detected && (
+                    <div className="flex flex-col gap-1.5">
+                      <p className="text-[12px] text-[#92400E] mb-1">
+                        Wykryto potencjalne luki w zatrudnieniu. Warto je wyjaśnić (np. freelance, nauka, opieka).
+                      </p>
+                      {result.sections.careerGaps.gaps.map((g) => (
+                        <div key={g} className="flex items-center gap-1.5 text-[12px] text-[#92400E]">
+                          <span className="text-[10px]">⚠</span> {g}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </InfoCard>
               </div>
 
               {/* Suggestions */}
