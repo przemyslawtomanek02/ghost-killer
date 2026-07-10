@@ -39,10 +39,15 @@ Dodatkowe sygnały zewnętrzne (jeśli puste = nieznane, NIE zgaduj):
 
 WAŻNE: Bądź sceptyczny. Sama dobra treść ogłoszenia (ładny opis, stack, benefity) NIE wystarcza do oceny "realne" — wiele wydmuszek ma profesjonalny opis. Przy ocenie kryteriów dotyczących czasu wiszenia, liczby ofert i LinkedIna opieraj się WYŁĄCZNIE na sygnałach zewnętrznych poniżej. Jeśli sygnał jest "nieznane", oznacz to kryterium jako "yellow" (nie da się ocenić), a NIE "green".
 
+ZASADY OCENY:
+- "score" = liczba kryteriów ze statusem "red". Kryteria "yellow" NIE liczą się do score — oznaczają brak danych, nie podejrzaność.
+- Kryterium "Za dużo otwartych ról" — duże firmy, agencje rekrutacyjne, outsourcing i body-leasing (np. ITDS, Hays, Randstad, Sii, Capgemini) naturalnie mają dziesiątki lub setki ofert — to NIE jest sygnał ghost job. Oznacz "red" TYLKO gdy mała/średnia firma ma nieproporcjonalnie dużo ofert (np. 20-osobowa firma z 50 ofertami). Jeśli firma jest duża lub to agencja — oznacz "green" z odpowiednim wyjaśnieniem.
+- verdict: "safe" gdy score 0-1, "warning" gdy score 2-3, "danger" gdy score 4-6.
+
 Oceń każde z 6 kryteriów. Odpowiedz TYLKO czystym JSON-em, bez markdown, bez backticków:
 {
   "verdict": "safe" | "warning" | "danger",
-  "score": liczba 0-6,
+  "score": liczba 0-6 (TYLKO czerwone kryteria),
   "verdictLabel": "krótki werdykt, max 5 słów",
   "summary": "2-3 zdania rekomendacji",
   "criteria": [

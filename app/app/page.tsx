@@ -182,7 +182,7 @@ export default function AppPage() {
                       {result.verdictLabel}
                     </div>
                     <div className="text-sm font-bold whitespace-nowrap" style={{ color: verdictColor[result.verdict]?.text }}>
-                      {result.score} / 6 sygnałów
+                      {result.score} / 6 red flags
                     </div>
                   </div>
                   <p className="mt-2.5 text-[15px] leading-relaxed" style={{ color: verdictColor[result.verdict]?.text }}>

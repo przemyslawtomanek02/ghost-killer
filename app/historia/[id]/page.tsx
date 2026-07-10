@@ -157,7 +157,7 @@ export default function AnalysisDetailPage() {
                     </div>
                     {analysis.score != null && (
                       <div className="text-sm font-bold whitespace-nowrap" style={{ color: vc.text }}>
-                        {analysis.score} / 6 sygnałów
+                        {analysis.score} / 6 red flags
                       </div>
                     )}
                   </div>

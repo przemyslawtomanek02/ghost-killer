@@ -153,7 +153,7 @@ export default function LiveDemo() {
               className="shrink-0 text-[13px] font-bold px-3 py-1 rounded-full"
               style={{ background: "rgba(255,255,255,0.7)", color: vc.text }}
             >
-              {result.score}/6 sygnałów
+              {result.score}/6 red flags
             </div>
           </div>
           <p className="text-[15px] leading-relaxed" style={{ color: vc.text }}>
