@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import AppSidebar from "@/app/components/AppSidebar";
@@ -23,6 +23,30 @@ const gradeLabel: Record<string, string> = {
   D: "Słabe dopasowanie",
   F: "Wymaga przepisania",
 };
+
+// ─── PDF extraction ───────────────────────────────────────────────────────────
+
+async function extractTextFromPdf(file: File): Promise<string> {
+  const { getDocument, GlobalWorkerOptions } = await import("pdfjs-dist");
+  GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await getDocument({ data: arrayBuffer }).promise;
+
+  let text = "";
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items
+      .map((item) => ("str" in item ? item.str : ""))
+      .join(" ");
+    text += pageText + "\n";
+  }
+
+  return text.trim();
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function ScoreRing({ score, grade }: { score: number; grade: string }) {
   const gc = gradeColor[grade] ?? gradeColor["C"];
@@ -96,9 +120,12 @@ function Tag({ label, variant }: { label: string; variant: "green" | "red" | "ne
   );
 }
 
+// ─── Main page ────────────────────────────────────────────────────────────────
+
 export default function CvPage() {
   const router = useRouter();
   const mainRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [user, setUser] = useState<UserMeta>({});
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -108,7 +135,10 @@ export default function CvPage() {
   const [jobText, setJobText] = useState("");
   const [result, setResult] = useState<CvScanResult | null>(null);
   const [scanning, setScanning] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfError, setPdfError] = useState("");
   const [error, setError] = useState("");
+  const [dragOver, setDragOver] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -119,6 +149,45 @@ export default function CvPage() {
     });
   }, [router]);
 
+  const handlePdfFile = useCallback(async (file: File) => {
+    if (!file.type.includes("pdf") && !file.name.endsWith(".pdf")) {
+      setPdfError("Obsługiwany jest tylko format PDF.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setPdfError("Plik jest za duży (max 10 MB).");
+      return;
+    }
+
+    setPdfError("");
+    setPdfLoading(true);
+    try {
+      const text = await extractTextFromPdf(file);
+      if (text.length < 50) {
+        setPdfError("Nie udało się odczytać tekstu z PDF. Spróbuj wkleić tekst ręcznie.");
+      } else {
+        setCvText(text);
+      }
+    } catch {
+      setPdfError("Błąd odczytu PDF. Sprawdź czy plik nie jest zaszyfrowany i spróbuj ponownie.");
+    } finally {
+      setPdfLoading(false);
+    }
+  }, []);
+
+  function onFileInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) handlePdfFile(file);
+    e.target.value = "";
+  }
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handlePdfFile(file);
+  }
+
   function scan() {
     setError("");
     const cv = cvText.trim();
@@ -127,14 +196,11 @@ export default function CvPage() {
       return;
     }
     setScanning(true);
-    // Lekkie opóźnienie UI, żeby animacja zdążyła się pokazać
     setTimeout(() => {
       const r = scanCv(cv, jobText.trim() || undefined);
       setResult(r);
       setScanning(false);
-      setTimeout(() => {
-        mainRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-      }, 50);
+      setTimeout(() => mainRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 50);
     }, 300);
   }
 
@@ -143,6 +209,7 @@ export default function CvPage() {
     setError("");
     setCvText("");
     setJobText("");
+    setPdfError("");
   }
 
   if (authed === null) {
@@ -155,11 +222,7 @@ export default function CvPage() {
 
   return (
     <div className="flex h-screen bg-[#FAFAF7] overflow-hidden">
-      <AppSidebar
-        user={user}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
+      <AppSidebar user={user} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       <main ref={mainRef} className="flex-1 overflow-y-auto">
         {/* Mobile topbar */}
@@ -172,7 +235,7 @@ export default function CvPage() {
               <path d="M2 4h14M2 9h14M2 14h14" stroke="#0A0A0A" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
-          <span className="font-bold text-[16px] tracking-tight">Skaner CV</span>
+          <span className="font-bold text-[16px] tracking-tight text-[#0A0A0A]">Skaner CV</span>
         </div>
 
         <div className="max-w-3xl mx-auto px-4 md:px-8 py-8">
@@ -182,37 +245,92 @@ export default function CvPage() {
               Skaner CV
             </h1>
             <p className="text-[15px] text-[#57564F] leading-relaxed">
-              Sprawdź, jak Twoje CV wypadnie w systemie ATS. Wklej tekst CV i opcjonalnie ogłoszenie pracy,
-              żeby zobaczyć dopasowanie słów kluczowych.
+              Sprawdź, jak Twoje CV wypadnie w systemie ATS. Wgraj PDF lub wklej tekst i opcjonalnie
+              dodaj ogłoszenie pracy, żeby zobaczyć dopasowanie słów kluczowych.
             </p>
           </div>
 
           {!result ? (
             /* ─── Input form ─────────────────────────────────────────── */
             <div className="flex flex-col gap-5">
+
+              {/* PDF drop zone */}
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={onDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`
+                  relative flex flex-col items-center justify-center gap-2 px-6 py-7
+                  border-2 border-dashed rounded-2xl cursor-pointer transition-colors select-none
+                  ${dragOver
+                    ? "border-[#7C6FE8] bg-[#E9E5FE]/30"
+                    : "border-[#ECEAE3] bg-white hover:border-[#9C9B93] hover:bg-[#FAFAF7]"}
+                `}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={onFileInput}
+                  className="hidden"
+                />
+                {pdfLoading ? (
+                  <>
+                    <div className="w-6 h-6 border-2 border-[#7C6FE8] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-[13px] text-[#57564F] font-medium">Czytam PDF...</span>
+                  </>
+                ) : cvText.length > 0 ? (
+                  <>
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                      <circle cx="11" cy="11" r="10" fill="#F0FDF4" stroke="#BBF7D0" strokeWidth="1.5" />
+                      <path d="M7 11l3 3 5-5" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span className="text-[13px] text-[#166534] font-medium">
+                      Tekst wczytany ({cvText.length} znaków) — możesz wgrać inny PDF
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="#9C9B93" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M14 2v6h6M12 12v6M9 15l3-3 3 3" stroke="#9C9B93" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span className="text-[13px] text-[#57564F] font-medium">
+                      Przeciągnij PDF tutaj lub <span className="text-[#7C6FE8] font-semibold">kliknij, żeby wybrać</span>
+                    </span>
+                    <span className="text-[11px] text-[#9C9B93]">PDF, max 10 MB</span>
+                  </>
+                )}
+              </div>
+
+              {pdfError && (
+                <p className="text-[13px] text-red-600 font-medium -mt-2">{pdfError}</p>
+              )}
+
               {/* CV textarea */}
               <div>
-                <label className="block text-[13px] font-semibold text-[#6B6A63] mb-2">
-                  Tekst CV <span className="text-[#DC2626]">*</span>
+                <label className="block text-[13px] font-semibold text-[#6B6A63] mb-1.5">
+                  Tekst CV{" "}
+                  <span className="text-[11px] font-normal text-[#9C9B93]">
+                    (lub wklej ręcznie po wgraniu PDF)
+                  </span>
                 </label>
-                <p className="text-[12px] text-[#9C9B93] mb-2">
-                  Skopiuj i wklej pełny tekst CV (Ctrl+A → Ctrl+C z dokumentu Word/PDF).
-                </p>
                 <textarea
                   value={cvText}
                   onChange={(e) => setCvText(e.target.value)}
-                  placeholder="Jan Kowalski&#10;jan.kowalski@email.com | +48 123 456 789&#10;&#10;DOŚWIADCZENIE ZAWODOWE&#10;Senior Frontend Developer — Firma XYZ (2021–obecnie)&#10;— Wdrożyłem nową architekturę komponentów w React, skracając czas ładowania o 40%&#10;..."
-                  rows={14}
-                  className="w-full border border-[#ECEAE3] rounded-2xl px-5 py-4 text-[14px] bg-white outline-none focus:border-[#9C9B93] transition-colors resize-none font-mono leading-relaxed"
+                  placeholder={"Jan Kowalski\njan.kowalski@email.com | +48 123 456 789\n\nDOŚWIADCZENIE ZAWODOWE\nSenior Frontend Developer — Firma XYZ (2021–obecnie)\n— Wdrożyłem nową architekturę komponentów w React, skracając czas ładowania o 40%\n..."}
+                  rows={12}
+                  className="w-full border border-[#ECEAE3] rounded-2xl px-5 py-4 text-[14px] text-[#0A0A0A] bg-white outline-none focus:border-[#9C9B93] transition-colors resize-none font-mono leading-relaxed placeholder:text-[#BFBDB6]"
                 />
                 <div className="flex justify-end mt-1">
                   <span className="text-[11px] text-[#9C9B93]">{cvText.length} znaków</span>
                 </div>
               </div>
 
-              {/* Job description textarea */}
+              {/* Job textarea */}
               <div>
-                <label className="block text-[13px] font-semibold text-[#6B6A63] mb-2">
+                <label className="block text-[13px] font-semibold text-[#6B6A63] mb-1.5">
                   Ogłoszenie pracy{" "}
                   <span className="text-[11px] font-normal text-[#9C9B93]">
                     (opcjonalnie — sprawdza dopasowanie słów kluczowych)
@@ -222,18 +340,18 @@ export default function CvPage() {
                   value={jobText}
                   onChange={(e) => setJobText(e.target.value)}
                   placeholder="Wklej tutaj treść ogłoszenia pracy, na które aplikujesz..."
-                  rows={7}
-                  className="w-full border border-[#ECEAE3] rounded-2xl px-5 py-4 text-[14px] bg-white outline-none focus:border-[#9C9B93] transition-colors resize-none leading-relaxed"
+                  rows={6}
+                  className="w-full border border-[#ECEAE3] rounded-2xl px-5 py-4 text-[14px] text-[#0A0A0A] bg-white outline-none focus:border-[#9C9B93] transition-colors resize-none leading-relaxed placeholder:text-[#BFBDB6]"
                 />
               </div>
 
               {error && (
-                <div className="text-red-600 text-[13px] font-medium">{error}</div>
+                <p className="text-red-600 text-[13px] font-medium">{error}</p>
               )}
 
               <button
                 onClick={scan}
-                disabled={scanning}
+                disabled={scanning || pdfLoading}
                 className="w-full py-4 rounded-2xl bg-black text-white font-bold text-[15px] disabled:opacity-60 hover:bg-[#1a1a1a] transition-colors flex items-center justify-center gap-2"
               >
                 {scanning ? (
@@ -241,18 +359,12 @@ export default function CvPage() {
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Analizuję...
                   </>
-                ) : (
-                  "Skanuj CV →"
-                )}
+                ) : "Skanuj CV →"}
               </button>
 
-              {/* Info box */}
               <div className="bg-[#F5F4EF] border border-[#ECEAE3] rounded-2xl px-5 py-4 text-[13px] text-[#57564F] leading-relaxed">
-                <strong className="text-[#0A0A0A]">Jak działa skaner?</strong>
-                <br />
-                Algorytm sprawdza 5 kategorii: dopasowanie słów kluczowych do oferty, strukturę CV,
-                kompatybilność z systemami ATS, obecność mierzalnych osiągnięć i użycie słów akcji.
-                Całość liczy się lokalnie w przeglądarce — tekst Twojego CV nigdzie nie jest wysyłany.
+                <strong className="text-[#0A0A0A]">Prywatność:</strong>{" "}
+                Cała analiza odbywa się lokalnie w przeglądarce — treść CV nigdzie nie jest wysyłana.
               </div>
             </div>
           ) : (
@@ -263,7 +375,33 @@ export default function CvPage() {
                 <ScoreRing score={result.totalScore} grade={result.grade} />
               </div>
 
-              {/* Category breakdown */}
+              {/* RODO badge */}
+              <div
+                className={`flex items-start gap-3 px-5 py-4 rounded-2xl border text-[13px] leading-relaxed ${
+                  result.sections.rodo.present
+                    ? "bg-[#F0FDF4] border-[#BBF7D0] text-[#166534]"
+                    : "bg-[#FFFBEB] border-[#FDE68A] text-[#92400E]"
+                }`}
+              >
+                <span className="text-[18px] leading-none mt-0.5">
+                  {result.sections.rodo.present ? "✓" : "⚠"}
+                </span>
+                <div>
+                  <p className="font-semibold mb-0.5">
+                    Klauzula RODO: {result.sections.rodo.present ? "znaleziona" : "brak"}
+                  </p>
+                  {result.sections.rodo.present && result.sections.rodo.clause ? (
+                    <p className="text-[12px] opacity-80 italic">&ldquo;{result.sections.rodo.clause}&hellip;&rdquo;</p>
+                  ) : (
+                    <p className="text-[12px] opacity-80">
+                      Wiele firm wymaga klauzuli zgody na przetwarzanie danych osobowych. Dodaj ją na końcu CV:{" "}
+                      <em>„Wyrażam zgodę na przetwarzanie moich danych osobowych dla celów rekrutacji zgodnie z art. 6 ust. 1 lit. a RODO."</em>
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Category cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Keywords */}
                 <SectionCard
@@ -357,8 +495,8 @@ export default function CvPage() {
                   )}
                 </SectionCard>
 
-                {/* Achievements + Action verbs side by side */}
                 <div className="flex flex-col gap-3">
+                  {/* Achievements */}
                   <SectionCard
                     title="Mierzalne osiągnięcia"
                     score={result.sections.achievements.score}
@@ -367,10 +505,11 @@ export default function CvPage() {
                     <p className="text-[12px] text-[#57564F]">
                       {result.sections.achievements.count === 0
                         ? "Nie znaleziono liczb ani procentów — dodaj konkretne wyniki."
-                        : `Wykryto ${result.sections.achievements.count} liczb i wartości (%, tys., mln...).`}
+                        : `Wykryto ${result.sections.achievements.count} wartości liczbowych (%, tys., mln...).`}
                     </p>
                   </SectionCard>
 
+                  {/* Action verbs */}
                   <SectionCard
                     title="Słowa akcji"
                     score={result.sections.actionVerbs.score}
@@ -394,9 +533,7 @@ export default function CvPage() {
               {/* Suggestions */}
               {result.suggestions.length > 0 && (
                 <div className="bg-white border border-[#ECEAE3] rounded-2xl p-6">
-                  <h3 className="text-[15px] font-bold text-[#0A0A0A] mb-4">
-                    Co poprawić
-                  </h3>
+                  <h3 className="text-[15px] font-bold text-[#0A0A0A] mb-4">Co poprawić</h3>
                   <ol className="flex flex-col gap-3">
                     {result.suggestions.map((s, i) => (
                       <li key={i} className="flex items-start gap-3 text-[13px] text-[#57564F] leading-relaxed">

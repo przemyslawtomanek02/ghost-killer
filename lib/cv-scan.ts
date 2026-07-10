@@ -165,6 +165,10 @@ export type CvScanResult = {
       max: number;
       issues: string[];
     };
+    rodo: {
+      present: boolean;
+      clause: string | null; // fragment znalezionej klauzuli
+    };
     achievements: {
       score: number;
       max: number;
@@ -366,6 +370,37 @@ function scoreActionVerbs(cvText: string): CvScanResult["sections"]["actionVerbs
   return { score, max: MAX, found: found.slice(0, 10) };
 }
 
+function detectRodo(cvText: string): CvScanResult["sections"]["rodo"] {
+  // Patterns matching typical Polish RODO consent clause
+  const rodoPatterns = [
+    /wyra[żz]am\s+zgod[ęe]\s+na\s+przetwarzanie/i,
+    /przetwarzanie\s+(moich\s+)?danych\s+osobowych/i,
+    /\bRODO\b/,
+    /\bGDPR\b/i,
+    /rozporz[ąa]dzeni[au]\s+(parlamentu|UE|o ochronie)/i,
+    /art\.?\s*6\s+(ust\.?)?\s*1?\s*(lit\.?)?\s*[a-cA-C]/,
+    /administrator\s+danych\s+osobowych/i,
+    /ochrona\s+danych\s+osobowych/i,
+    /cel[eó]w?\s+rekrutacji/i,
+  ];
+
+  // Need at least 2 matching signals to confirm a real RODO clause
+  const matchingPatterns = rodoPatterns.filter((p) => p.test(cvText));
+
+  if (matchingPatterns.length < 2) {
+    return { present: false, clause: null };
+  }
+
+  // Extract a snippet around the first strong match
+  const mainMatch = cvText.match(/wyra[żz]am\s+zgod[ęe][^.]{0,200}/i)
+    ?? cvText.match(/przetwarzanie\s+(moich\s+)?danych\s+osobowych[^.]{0,150}/i)
+    ?? cvText.match(/\bRODO\b.{0,150}/i);
+
+  const clause = mainMatch ? mainMatch[0].trim().slice(0, 180) : null;
+
+  return { present: true, clause };
+}
+
 function buildSuggestions(r: Omit<CvScanResult, "suggestions">): string[] {
   const s: string[] = [];
 
@@ -421,6 +456,7 @@ export function scanCv(cvText: string, jobText?: string): CvScanResult {
   const keywords = scoreKeywords(cvText, jobText);
   const structure = scoreStructure(cvText);
   const ats = scoreAts(cvText);
+  const rodo = detectRodo(cvText);
   const achievements = scoreAchievements(cvText);
   const actionVerbs = scoreActionVerbs(cvText);
 
@@ -432,7 +468,7 @@ export function scanCv(cvText: string, jobText?: string): CvScanResult {
     totalScore >= 50 ? "C" :
     totalScore >= 30 ? "D" : "F";
 
-  const partial = { totalScore, grade, sections: { keywords, structure, ats, achievements, actionVerbs } };
+  const partial = { totalScore, grade, sections: { keywords, structure, ats, rodo, achievements, actionVerbs } };
 
   return { ...partial, suggestions: buildSuggestions(partial) };
 }
