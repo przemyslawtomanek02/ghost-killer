@@ -103,7 +103,7 @@ export default function AppSidebar({
             >
               A
             </div>
-            <span className="font-bold text-[19px] tracking-tight">Analyss</span>
+            <span className="font-bold text-[19px] tracking-tight text-[#0A0A0A]">Analyss</span>
           </Link>
         </div>
 
