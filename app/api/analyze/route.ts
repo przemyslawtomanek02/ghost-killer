@@ -17,10 +17,10 @@ export async function POST(req: Request) {
     );
   }
 
-  // 2. sprawdź blokadę konta
+  // 2. sprawdź blokadę konta i plan
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_blocked")
+    .select("is_blocked, is_pro")
     .eq("id", user.id)
     .single();
 
@@ -31,24 +31,26 @@ export async function POST(req: Request) {
     );
   }
 
-  // 3. limit freemium — liczymy analizy w tym miesiącu
-  const since = new Date();
-  since.setDate(1);
-  since.setHours(0, 0, 0, 0);
+  // 3. limit freemium — pomijamy dla is_pro
+  let used = 0;
+  if (!profile?.is_pro) {
+    const since = new Date();
+    since.setDate(1);
+    since.setHours(0, 0, 0, 0);
 
-  const { count } = await supabase
-    .from("analyses")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .gte("created_at", since.toISOString());
+    const { count } = await supabase
+      .from("analyses")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", since.toISOString());
 
-  // (Później: jeśli profiles.is_pro === true, pomiń limit)
-  const used = count ?? 0;
-  if (used >= FREE_LIMIT) {
-    return NextResponse.json(
-      { error: "Limit darmowych analiz wyczerpany.", limitReached: true },
-      { status: 402 },
-    );
+    used = count ?? 0;
+    if (used >= FREE_LIMIT) {
+      return NextResponse.json(
+        { error: "Limit darmowych analiz wyczerpany.", limitReached: true },
+        { status: 402 },
+      );
+    }
   }
 
   // 4. dane wejściowe

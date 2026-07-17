@@ -31,6 +31,9 @@ export default function AppPage() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [jobText, setJobText] = useState("");
+  const [jobUrl, setJobUrl] = useState("");
+  const [fetchingUrl, setFetchingUrl] = useState(false);
+  const [urlError, setUrlError] = useState("");
   const [company, setCompany] = useState("");
   const [postedDaysAgo, setPostedDaysAgo] = useState("");
   const [openRoles, setOpenRoles] = useState("");
@@ -68,6 +71,8 @@ export default function AppPage() {
     setTokenUsage(null);
     setError("");
     setJobText("");
+    setJobUrl("");
+    setUrlError("");
     setCompany("");
     setPostedDaysAgo("");
     setOpenRoles("");
@@ -102,6 +107,34 @@ export default function AppPage() {
     setUsesLeft(data.usesLeft ?? null);
     setRefreshKey((k) => k + 1); // odśwież listę w sidebarze
     setTimeout(() => mainRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 50);
+  }
+
+  async function fetchFromUrl() {
+    if (!jobUrl.trim()) return;
+    setFetchingUrl(true);
+    setUrlError("");
+
+    const res = await fetch("/api/fetch-job", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: jobUrl.trim() }),
+    });
+
+    setFetchingUrl(false);
+
+    if (res.status === 401) { router.push("/login"); return; }
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      setUrlError((d as { error?: string }).error ?? "Nie udało się wczytać linku.");
+      return;
+    }
+
+    const data = await res.json();
+    setJobText(data.text);
+    if (data.company) setCompany(data.company);
+    if (data.postedDaysAgo !== null && data.postedDaysAgo !== undefined) setPostedDaysAgo(String(data.postedDaysAgo));
+    if (data.openRoles !== null && data.openRoles !== undefined) setOpenRoles(String(data.openRoles));
+    setJobUrl("");
   }
 
   if (authed === null) {
@@ -289,6 +322,36 @@ export default function AppPage() {
                       <option value="nie sprawdzałem">Nie wiem</option>
                     </select>
                   </div>
+                  {/* URL input — BETA */}
+                  <div className="mb-3">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[12px] text-[#9C9B93]">Wczytaj z linku</span>
+                      <span className="text-[10px] font-bold bg-[#7C6FE8] text-white px-1.5 py-0.5 rounded-full tracking-wide">BETA</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        value={jobUrl}
+                        onChange={(e) => { setJobUrl(e.target.value); setUrlError(""); }}
+                        onKeyDown={(e) => e.key === "Enter" && fetchFromUrl()}
+                        placeholder="https://linkedin.com/jobs/view/..."
+                        className="flex-1 border border-[#ECEAE3] rounded-xl px-4 py-3 text-[14px] bg-[#FAFAF7] outline-none focus:border-[#9C9B93] transition-colors"
+                      />
+                      <button
+                        onClick={fetchFromUrl}
+                        disabled={fetchingUrl || !jobUrl.trim()}
+                        className="px-4 py-3 rounded-xl bg-[#7C6FE8] text-white font-semibold text-[14px] disabled:opacity-50 hover:bg-[#6B5FD7] transition-colors whitespace-nowrap"
+                      >
+                        {fetchingUrl ? (
+                          <span className="flex items-center gap-2">
+                            <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
+                            Wczytuję
+                          </span>
+                        ) : "Wczytaj"}
+                      </button>
+                    </div>
+                    {urlError && <p className="text-red-600 text-[12px] mt-1.5">{urlError}</p>}
+                  </div>
+
                   <textarea
                     value={jobText}
                     onChange={(e) => setJobText(e.target.value)}
