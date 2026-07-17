@@ -236,6 +236,105 @@ function Nav() {
   );
 }
 
+// ── Live Stats Section ────────────────────────────────────────────────────────
+
+function useCountUp(target: number, duration = 1400) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (target === 0) return;
+    setValue(0);
+    const start = performance.now();
+    function tick(now: number) {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setValue(Math.round(eased * target));
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+type LiveStats = { total: number; ghostPercent: number; companies: number };
+
+function LiveStatsSection() {
+  const [stats, setStats] = useState<LiveStats | null>(null);
+
+  useEffect(() => {
+    function load() {
+      fetch("/api/stats")
+        .then((r) => r.json())
+        .then((d) => setStats(d))
+        .catch(() => {});
+    }
+    load();
+    const id = setInterval(load, 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const total = useCountUp(stats?.total ?? 0);
+  const pct = useCountUp(stats?.ghostPercent ?? 0);
+  const companies = useCountUp(stats?.companies ?? 0);
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="bg-[#0F0B1F] text-white"
+    >
+      <div className="max-w-6xl mx-auto px-6 py-14">
+        {/* Live indicator */}
+        <div className="flex items-center justify-center gap-2 mb-10">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+          </span>
+          <span className="text-[12px] font-bold tracking-[0.12em] uppercase text-[#6B6A83]">
+            Live — aktualizowane co 30 sekund
+          </span>
+        </div>
+
+        {/* Stats row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+
+          {/* Stat 1 — total */}
+          <div className="flex flex-col items-center justify-center py-6 md:py-0 md:border-r border-[#1E1A30]">
+            <div className="text-[72px] md:text-[96px] font-black tracking-[-0.04em] leading-none tabular-nums bg-gradient-to-br from-white to-[#9C9B93] bg-clip-text text-transparent">
+              {stats ? total.toLocaleString("pl-PL") : "—"}
+            </div>
+            <div className="text-[13px] text-[#6B6A83] font-medium mt-3 tracking-wide">
+              analiz wykonanych
+            </div>
+          </div>
+
+          {/* Stat 2 — ghost percent */}
+          <div className="flex flex-col items-center justify-center py-6 md:py-0 md:border-r border-[#1E1A30] border-t md:border-t-0">
+            <div className="text-[72px] md:text-[96px] font-black tracking-[-0.04em] leading-none tabular-nums bg-gradient-to-br from-[#F27C5E] to-[#E85A3C] bg-clip-text text-transparent">
+              {stats ? `${pct}%` : "—"}
+            </div>
+            <div className="text-[13px] text-[#6B6A83] font-medium mt-3 tracking-wide">
+              to ghost joby
+            </div>
+          </div>
+
+          {/* Stat 3 — companies */}
+          <div className="flex flex-col items-center justify-center py-6 md:py-0 border-t md:border-t-0 border-[#1E1A30]">
+            <div className="text-[72px] md:text-[96px] font-black tracking-[-0.04em] leading-none bg-gradient-to-br from-[#7C6FE8] to-[#5B4ED4] bg-clip-text text-transparent text-center tabular-nums">
+              {stats ? companies.toLocaleString("pl-PL") : "—"}
+            </div>
+            <div className="text-[13px] text-[#6B6A83] font-medium mt-3 tracking-wide">
+              przeskanowanych firm
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
 // ── Floating Job Card ─────────────────────────────────────────────────────────
 
 function FloatingCard({
@@ -1157,6 +1256,7 @@ export default function LandingPage() {
       <AnimatedBackground />
       <Nav />
       <Hero />
+      <LiveStatsSection />
       <Stats />
       <DemoSection />
       <Features />

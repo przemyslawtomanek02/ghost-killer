@@ -78,3 +78,26 @@ Kolejność roboty
 ---
 
 Zaczynamy? Mogę od razu zrobić kroki 1–2 (kod), a deploy i Supabase config to po Twojej stronie (kilka kliknięć). Powiedz tylko czy whitelist ma blokować dostęp do całej strony łącznie z landingiem, czy tylko do /app i /historia.
+
+
+
+
+Na podstawie tego co już jest, tu są rzeczy z największym wpływem na konwersję:                                                                                                                         
+                                                                                                                                                                                                        
+  ---                                                                                                                                                                                                     
+  Najsilniejsze argumenty do zakupu Pro
+                                                                                                                                                                                                          
+  1. Śledzenie oferty — "Powiadom mnie e-mailem jeśli ogłoszenie zniknie lub zostanie odświeżone". Ghost joby często wracają co miesiąc — to unikalny feature którego nikt inny nie ma.                 
+  2. Ranking firm — baza danych z historii wszystkich analiz: które firmy najczęściej mają ghost joby. Unikalne dane które rosną same z siebie z każdą analizą.                                           
+  3. Dopasowanie CV do oferty — po wczytaniu ogłoszenia z linku naturalnym kolejnym krokiem jest "sprawdź moje CV pod tę ofertę". Połączenie istniejącego skanera CV z analizatorem oferty.               
+  4. Rozszerzenie Chrome — badge z oceną ghost joba bezpośrednio na RocketJobs/LinkedIn/Pracuj bez wchodzenia do apki. Najwyższy efekt WOW i najlepsza reklama organiczna.                                
+                                                                                                                                                                                                          
+  ---                                                                                                                                                                                                     
+  Szybkie wygrane dla landing page (bez płatnej subskrypcji)                                                                                                                                              
+                                                                                                                                                                                                          
+  5. Live licznik — "Przeanalizowano X ofert. Y% to ghost joby." — buduje zaufanie i pilność.                                                                                                           
+  6. Publiczne statystyki — top 10 firm z największą liczbą ghost jobów w Polsce. Medialne, udostępnialne.                                                                                                
+  7. Eksport PDF — raport z analizy do pobrania. Tani feature, ale konkretna wartość ("mam dowód że ta firma to ghost job").                                                                              
+                                                                                                                                                                                                          
+  ---                                                                                                                                                                                                     
+  Co chciałbyś zrobić pierwsze?           
