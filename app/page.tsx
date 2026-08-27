@@ -3,7 +3,13 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "motion/react";
 import { createClient } from "@/lib/supabase/client";
 import LiveDemo from "@/app/_components/LiveDemo";
 import FaqAccordion from "@/app/_components/FaqAccordion";
@@ -24,26 +30,23 @@ function Logo() {
   );
 }
 
-// ── 1. Nawigacja ─────────────────────────────────────────────────────────────
+// ── 1. Nawigacja (nowy dark hero — test screena) ─────────────────────────────
 
-// Shared glass styles reused for both the island and the mobile dropdown
-const glassStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.55)",
-  backdropFilter: "blur(20px) saturate(200%) brightness(1.05)",
-  WebkitBackdropFilter: "blur(20px) saturate(200%) brightness(1.05)",
-  boxShadow:
-    "0 4px 24px rgba(0,0,0,0.07), inset 0 0 0 1px rgba(255,255,255,0.75), inset 0 1px 0 rgba(255,255,255,0.9)",
-};
+// Wspólny styl przycisków CTA: 6px radius, Helvetica Bold 16px, tracking -5%
+const ctaBtnClass =
+  "font-bold text-[16px] tracking-[-0.05em] text-white rounded-[6px] hover:brightness-110 transition-all";
 
-function Nav() {
+function HeroNav() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    createClient().auth.getUser().then(({ data }) => {
-      if (data.user) setLoggedIn(true);
-    });
+    createClient()
+      .auth.getUser()
+      .then(({ data }) => {
+        if (data.user) setLoggedIn(true);
+      });
   }, []);
 
   async function logout() {
@@ -53,291 +56,171 @@ function Nav() {
   }
 
   return (
-    <header className="fixed top-4 left-0 right-0 z-50 px-4 md:px-6 pointer-events-none">
-      <div className="max-w-6xl mx-auto pointer-events-auto flex flex-col gap-2">
-
-        {/* ── Main island ───────────────────────────────────────────────── */}
-        <div
-          className="relative rounded-2xl overflow-hidden px-5 py-3 flex items-center justify-between gap-4"
-          style={glassStyle}
+    <header className="relative z-20 px-6 md:px-10 py-7">
+      <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+        <Link
+          href="/"
+          onClick={() => setOpen(false)}
+          className="font-bold text-[21px] tracking-tight text-white"
         >
-          {/* Glitch: iridescent shimmer */}
+          Analyss
+        </Link>
+
+        <nav className="hidden md:flex items-center gap-8 text-[15px] font-medium text-[#B4B4BC]">
+          <a href="#jak-dziala" className="hover:text-white transition-colors">
+            Jak to działa?
+          </a>
+          <a href="#cennik" className="hover:text-white transition-colors">
+            Cennik
+          </a>
+          <a href="#faq" className="hover:text-white transition-colors">
+            FAQ
+          </a>
+        </nav>
+
+        <div className="hidden md:flex items-center gap-6">
+          {loggedIn ? (
+            <>
+              <Link
+                href="/app"
+                className={`${ctaBtnClass} px-5 py-2.5`}
+                style={{ background: "var(--hero-blue)" }}
+              >
+                Otwórz apkę
+              </Link>
+              <button
+                onClick={logout}
+                className="text-[15px] font-medium text-[#B4B4BC] hover:text-white transition-colors"
+              >
+                Wyloguj
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-[15px] font-medium text-[#B4B4BC] hover:text-white transition-colors"
+              >
+                Zaloguj się
+              </Link>
+              <Link
+                href="/register"
+                className={`${ctaBtnClass} px-5 py-2.5`}
+                style={{ background: "var(--hero-blue)" }}
+              >
+                Wypróbuj za darmo
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Hamburger button — mobile only */}
+        <button
+          onClick={() => setOpen(!open)}
+          aria-label={open ? "Zamknij menu" : "Otwórz menu"}
+          className="md:hidden flex flex-col items-center justify-center gap-[5px] w-9 h-9 shrink-0 rounded-xl hover:bg-white/5 transition-colors"
+        >
+          <motion.span
+            animate={{ rotate: open ? 45 : 0, y: open ? 6.5 : 0 }}
+            transition={{ duration: 0.22, ease: "easeInOut" }}
+            className="block w-[18px] h-[1.5px] bg-white rounded-full origin-center"
+          />
+          <motion.span
+            animate={{ opacity: open ? 0 : 1, scaleX: open ? 0 : 1 }}
+            transition={{ duration: 0.18 }}
+            className="block w-[18px] h-[1.5px] bg-white rounded-full"
+          />
+          <motion.span
+            animate={{ rotate: open ? -45 : 0, y: open ? -6.5 : 0 }}
+            transition={{ duration: 0.22, ease: "easeInOut" }}
+            className="block w-[18px] h-[1.5px] bg-white rounded-full origin-center"
+          />
+        </button>
+      </div>
+
+      {/* ── Mobile dropdown ───────────────────────────────────────────── */}
+      <AnimatePresence>
+        {open && (
           <motion.div
-            className="absolute inset-0 pointer-events-none mix-blend-overlay"
+            key="mobile-menu"
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.97 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+            className="md:hidden mt-4 max-w-6xl mx-auto rounded-2xl overflow-hidden border"
             style={{
-              background:
-                "linear-gradient(105deg, rgba(124,111,232,0.18) 0%, rgba(255,255,255,0) 40%, rgba(242,124,94,0.14) 70%, rgba(232,244,214,0.12) 100%)",
-              borderRadius: "inherit",
+              background: "var(--hero-card-bg)",
+              borderColor: "var(--hero-border)",
             }}
-            animate={{ x: ["-30%", "30%", "-30%"] }}
-            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-          />
+          >
+            <nav className="flex flex-col p-3 gap-1">
+              {[
+                { href: "#jak-dziala", label: "Jak to działa?" },
+                { href: "#cennik", label: "Cennik" },
+                { href: "#faq", label: "FAQ" },
+              ].map(({ href, label }) => (
+                <a
+                  key={href}
+                  href={href}
+                  onClick={() => setOpen(false)}
+                  className="px-4 py-3 text-[15px] font-medium text-[#B4B4BC] hover:text-white rounded-xl hover:bg-white/5 transition-colors"
+                >
+                  {label}
+                </a>
+              ))}
 
-          {/* Glitch: scan line */}
-          <motion.div
-            className="absolute left-2 right-2 pointer-events-none"
-            style={{
-              height: "1px",
-              background:
-                "linear-gradient(90deg, transparent, rgba(124,111,232,0.5) 30%, rgba(242,124,94,0.5) 70%, transparent)",
-            }}
-            animate={{ top: ["-1px", "calc(100% + 1px)"], opacity: [0, 0.9, 0.9, 0] }}
-            transition={{ duration: 1.0, repeat: Infinity, repeatDelay: 6, ease: "easeInOut", times: [0, 0.1, 0.9, 1] }}
-          />
+              <div className="h-px bg-white/10 mx-1 my-1" />
 
-          {/* Glitch: RGB edge flash */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            style={{ borderRadius: "inherit" }}
-            animate={{
-              boxShadow: [
-                "inset 0 0 0 1px rgba(124,111,232,0)",
-                "inset 0 0 0 1px rgba(124,111,232,0.6)",
-                "inset 0 0 0 1px rgba(242,124,94,0.4)",
-                "inset 0 0 0 1px rgba(124,111,232,0)",
-              ],
-              opacity: [0, 1, 1, 0],
-            }}
-            transition={{ duration: 0.25, repeat: Infinity, repeatDelay: 9, ease: "easeOut", times: [0, 0.2, 0.7, 1] }}
-          />
-
-          {/* Content */}
-          <div className="relative z-10 flex items-center justify-between gap-4 w-full">
-            <Link href="/" onClick={() => setOpen(false)}>
-              <Logo />
-            </Link>
-
-            {/* Desktop nav */}
-            <nav className="hidden md:flex items-center gap-8 text-[14px] font-medium text-[#57564F]">
-              <a href="#jak-dziala" className="hover:text-[#0A0A0A] transition-colors">Jak działa</a>
-              <a href="#cennik" className="hover:text-[#0A0A0A] transition-colors">Cennik</a>
-              <a href="#faq" className="hover:text-[#0A0A0A] transition-colors">FAQ</a>
-            </nav>
-
-            {/* Desktop auth */}
-            <div className="hidden md:flex items-center gap-3">
               {loggedIn ? (
                 <>
-                  <Link href="/app" className="text-[14px] font-semibold bg-black text-white rounded-full px-4 py-2 hover:bg-[#1a1a1a] transition-colors">
+                  <Link
+                    href="/app"
+                    onClick={() => setOpen(false)}
+                    className={`${ctaBtnClass} mt-1 mx-1 px-4 py-3.5 text-center`}
+                    style={{ background: "var(--hero-blue)" }}
+                  >
                     Otwórz apkę
                   </Link>
-                  <button onClick={logout} className="text-[14px] font-medium text-[#57564F] hover:text-[#0A0A0A] transition-colors">
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      logout();
+                    }}
+                    className="px-4 py-3 text-[15px] font-medium text-[#B4B4BC] hover:text-white rounded-xl hover:bg-white/5 transition-colors text-left"
+                  >
                     Wyloguj
                   </button>
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="text-[14px] font-medium text-[#57564F] hover:text-[#0A0A0A] transition-colors">
+                  <Link
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                    className="px-4 py-3 text-[15px] font-medium text-[#B4B4BC] hover:text-white rounded-xl hover:bg-white/5 transition-colors"
+                  >
                     Zaloguj się
                   </Link>
-                  <Link href="/register" className="text-[14px] font-semibold bg-black text-white rounded-full px-4 py-2 hover:bg-[#1a1a1a] transition-colors">
+                  <Link
+                    href="/register"
+                    onClick={() => setOpen(false)}
+                    className={`${ctaBtnClass} mt-1 mx-1 px-4 py-3.5 text-center`}
+                    style={{ background: "var(--hero-blue)" }}
+                  >
                     Wypróbuj za darmo
                   </Link>
                 </>
               )}
-            </div>
-
-            {/* Hamburger button — mobile only */}
-            <button
-              onClick={() => setOpen(!open)}
-              aria-label={open ? "Zamknij menu" : "Otwórz menu"}
-              className="md:hidden flex flex-col items-center justify-center gap-[5px] w-9 h-9 shrink-0 rounded-xl hover:bg-black/5 transition-colors"
-            >
-              <motion.span
-                animate={{ rotate: open ? 45 : 0, y: open ? 6.5 : 0 }}
-                transition={{ duration: 0.22, ease: "easeInOut" }}
-                className="block w-[18px] h-[1.5px] bg-[#0A0A0A] rounded-full origin-center"
-              />
-              <motion.span
-                animate={{ opacity: open ? 0 : 1, scaleX: open ? 0 : 1 }}
-                transition={{ duration: 0.18 }}
-                className="block w-[18px] h-[1.5px] bg-[#0A0A0A] rounded-full"
-              />
-              <motion.span
-                animate={{ rotate: open ? -45 : 0, y: open ? -6.5 : 0 }}
-                transition={{ duration: 0.22, ease: "easeInOut" }}
-                className="block w-[18px] h-[1.5px] bg-[#0A0A0A] rounded-full origin-center"
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* ── Mobile dropdown ───────────────────────────────────────────── */}
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              key="mobile-menu"
-              initial={{ opacity: 0, y: -10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.97 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-              className="md:hidden rounded-2xl overflow-hidden"
-              style={glassStyle}
-            >
-              <nav className="flex flex-col p-3 gap-1">
-                {[
-                  { href: "#jak-dziala", label: "Jak działa" },
-                  { href: "#cennik", label: "Cennik" },
-                  { href: "#faq", label: "FAQ" },
-                ].map(({ href, label }) => (
-                  <a
-                    key={href}
-                    href={href}
-                    onClick={() => setOpen(false)}
-                    className="px-4 py-3 text-[15px] font-medium text-[#57564F] hover:text-[#0A0A0A] rounded-xl hover:bg-black/5 transition-colors"
-                  >
-                    {label}
-                  </a>
-                ))}
-
-                <div className="h-px bg-black/[0.07] mx-1 my-1" />
-
-                {loggedIn ? (
-                  <>
-                    <Link
-                      href="/app"
-                      onClick={() => setOpen(false)}
-                      className="mt-1 mx-1 px-4 py-3.5 rounded-xl bg-black text-white font-bold text-[15px] text-center hover:bg-[#1a1a1a] transition-colors"
-                    >
-                      Otwórz apkę →
-                    </Link>
-                    <button
-                      onClick={() => { setOpen(false); logout(); }}
-                      className="px-4 py-3 text-[15px] font-medium text-[#57564F] hover:text-[#0A0A0A] rounded-xl hover:bg-black/5 transition-colors text-left"
-                    >
-                      Wyloguj
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/login"
-                      onClick={() => setOpen(false)}
-                      className="px-4 py-3 text-[15px] font-medium text-[#57564F] hover:text-[#0A0A0A] rounded-xl hover:bg-black/5 transition-colors"
-                    >
-                      Zaloguj się
-                    </Link>
-                    <Link
-                      href="/register"
-                      onClick={() => setOpen(false)}
-                      className="mt-1 mx-1 px-4 py-3.5 rounded-xl bg-black text-white font-bold text-[15px] text-center hover:bg-[#1a1a1a] transition-colors"
-                    >
-                      Wypróbuj za darmo →
-                    </Link>
-                  </>
-                )}
-              </nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-      </div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
 
-// ── Live Stats Section ────────────────────────────────────────────────────────
+// ── Floating Job Card (dark) — przeniesiona w obszar gradientu ───────────────
 
-function useCountUp(target: number, duration = 1400) {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (target === 0) return;
-    setValue(0);
-    const start = performance.now();
-    function tick(now: number) {
-      const p = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setValue(Math.round(eased * target));
-      if (p < 1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }, [target, duration]);
-  return value;
-}
-
-type LiveStats = { total: number; ghostPercent: number; companies: number };
-
-function LiveStatsSection() {
-  const [stats, setStats] = useState<LiveStats | null>(null);
-
-  useEffect(() => {
-    function load() {
-      fetch("/api/stats")
-        .then((r) => r.json())
-        .then((d) => setStats(d))
-        .catch(() => {});
-    }
-    load();
-    const id = setInterval(load, 30_000);
-    return () => clearInterval(id);
-  }, []);
-
-  const total = useCountUp(stats?.total ?? 0);
-  const pct = useCountUp(stats?.ghostPercent ?? 0);
-  const companies = useCountUp(stats?.companies ?? 0);
-
-  return (
-    <motion.section
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="bg-[#0F0B1F] text-white"
-    >
-      <div className="max-w-6xl mx-auto px-6 py-14">
-        {/* Live indicator */}
-        <div className="flex items-center justify-center gap-2 mb-10">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-          </span>
-          <span className="text-[12px] font-bold tracking-[0.12em] uppercase text-[#6B6A83]">
-            Live — aktualizowane co 30 sekund
-          </span>
-        </div>
-
-        {/* Stats row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
-
-          {/* Stat 1 — total */}
-          <div className="flex flex-col items-center justify-center py-6 md:py-0 md:border-r border-[#1E1A30]">
-            <div className="text-[72px] md:text-[96px] font-black tracking-[-0.04em] leading-none tabular-nums bg-gradient-to-br from-white to-[#9C9B93] bg-clip-text text-transparent">
-              {stats ? total.toLocaleString("pl-PL") : "—"}
-            </div>
-            <div className="text-[13px] text-[#6B6A83] font-medium mt-3 tracking-wide">
-              analiz wykonanych
-            </div>
-          </div>
-
-          {/* Stat 2 — ghost percent */}
-          <div className="flex flex-col items-center justify-center py-6 md:py-0 md:border-r border-[#1E1A30] border-t md:border-t-0">
-            <div className="text-[72px] md:text-[96px] font-black tracking-[-0.04em] leading-none tabular-nums bg-gradient-to-br from-[#F27C5E] to-[#E85A3C] bg-clip-text text-transparent">
-              {stats ? `${pct}%` : "—"}
-            </div>
-            <div className="text-[13px] text-[#6B6A83] font-medium mt-3 tracking-wide">
-              to ghost joby
-            </div>
-          </div>
-
-          {/* Stat 3 — companies */}
-          <div className="flex flex-col items-center justify-center py-6 md:py-0 border-t md:border-t-0 border-[#1E1A30]">
-            <div className="text-[72px] md:text-[96px] font-black tracking-[-0.04em] leading-none bg-gradient-to-br from-[#7C6FE8] to-[#5B4ED4] bg-clip-text text-transparent text-center tabular-nums">
-              {stats ? companies.toLocaleString("pl-PL") : "—"}
-            </div>
-            <div className="text-[13px] text-[#6B6A83] font-medium mt-3 tracking-wide">
-              przeskanowanych firm
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </motion.section>
-  );
-}
-
-// ── Floating Job Card ─────────────────────────────────────────────────────────
-
-function FloatingCard({
+function FloatingCardDark({
   title,
   badge,
   badgeStyle,
@@ -364,34 +247,41 @@ function FloatingCard({
     <motion.div
       animate={{ y: [0, -8, 0] }}
       transition={{ duration, repeat: Infinity, ease: "easeInOut", delay }}
-      className="absolute hidden md:block bg-white rounded-2xl p-4"
+      className="absolute hidden md:block rounded-2xl p-4 border"
       style={{
         width: `${width}px`,
         height: `${height}px`,
         transform: `rotate(${rotate}deg)`,
-        boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
-        opacity: 0.85,
+        background: "var(--hero-card-bg)",
+        borderColor: "var(--hero-border)",
+        boxShadow: "0 20px 50px rgba(0,0,0,0.45)",
+        opacity: 0.92,
         zIndex: 1,
         ...style,
       }}
     >
       <div className="flex items-start justify-between mb-3">
-        <div className="font-bold text-[13px] text-[#0A0A0A]">{title}</div>
+        <div className="font-bold text-[13px] text-white">{title}</div>
         {ghostBadge && (
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 shrink-0 ml-2">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-400 shrink-0 ml-2">
             Ghost job?
           </span>
         )}
       </div>
       <div className="flex flex-col gap-1.5 mb-3">
-        <div className="h-2 bg-[#ECEAE3] rounded-full w-full" />
-        <div className="h-2 bg-[#ECEAE3] rounded-full w-[80%]" />
-        <div className="h-2 bg-[#ECEAE3] rounded-full w-[60%]" />
+        <div className="h-2 bg-white/10 rounded-full w-full" />
+        <div className="h-2 bg-white/10 rounded-full w-[80%]" />
+        <div className="h-2 bg-white/10 rounded-full w-[60%]" />
       </div>
       <div className="absolute bottom-3.5 left-4">
         <span
           className="text-[10px] font-semibold px-2 py-1 rounded-full"
-          style={badgeStyle ?? { background: "#F1F0EE", color: "#57564F" }}
+          style={
+            badgeStyle ?? {
+              background: "rgba(255,255,255,0.08)",
+              color: "#B4B4BC",
+            }
+          }
         >
           {badge}
         </span>
@@ -400,87 +290,243 @@ function FloatingCard({
   );
 }
 
-// ── 2. Hero ──────────────────────────────────────────────────────────────────
+// ── 2. Hero (nowy dark styl — test screena) ──────────────────────────────────
 
-function Hero() {
+type HeroDemoResult = {
+  verdict: "safe" | "warning" | "danger";
+  score: number;
+  verdictLabel: string;
+  summary: string;
+};
+
+const heroVerdictColor: Record<string, string> = {
+  safe: "#22C55E",
+  warning: "#F59E0B",
+  danger: "#EF4444",
+};
+
+function HeroDark() {
+  const [jobText, setJobText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<HeroDemoResult | null>(null);
+  const [error, setError] = useState("");
+  const [limitReached, setLimitReached] = useState(false);
+
+  async function analyze() {
+    const text = jobText.trim();
+    if (text.length < 80) {
+      setError("Wklej dłuższe ogłoszenie (min. 80 znaków).");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setResult(null);
+    setLimitReached(false);
+
+    try {
+      const res = await fetch("/api/analyze-demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobText: text }),
+      });
+      const data = await res.json();
+
+      if (res.status === 429) {
+        setLimitReached(true);
+        return;
+      }
+      if (!res.ok) {
+        setError(data.error ?? "Coś poszło nie tak. Spróbuj ponownie.");
+        return;
+      }
+      setResult(data);
+    } catch {
+      setError("Błąd połączenia. Sprawdź internet i spróbuj ponownie.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <section className="relative min-h-[80vh] flex items-center overflow-x-hidden">
-      {/* Floating cards — desktop only, absolute to section */}
-      <FloatingCard
+    <section className="relative overflow-hidden hero-dark-bg">
+      <HeroNav />
+
+      {/* Pływające karty — przeniesione w dolną część, tam gdzie jest gradient */}
+      <FloatingCardDark
         title="Senior Developer"
         badge="TechCorp • Warszawa"
-        width={280}
-        height={180}
+        width={260}
+        height={170}
         rotate={-4}
         duration={4}
         delay={0}
-        style={{ left: "calc(50% - 580px)", top: "80px" }}
+        style={{ left: "calc(50% - 660px)", bottom: "260px" }}
       />
-      <FloatingCard
+      <FloatingCardDark
         title="UX Designer"
         badge="UXLab • Kraków"
         ghostBadge
-        width={220}
-        height={140}
+        width={210}
+        height={135}
         rotate={3}
         duration={3}
         delay={0.5}
-        style={{ right: "calc(50% - 580px)", top: "60px" }}
+        style={{ right: "calc(50% - 640px)", bottom: "300px" }}
       />
-      <FloatingCard
+      <FloatingCardDark
         title="Product Manager"
         badge="Remote"
-        width={280}
-        height={180}
+        width={260}
+        height={170}
         rotate={-2}
         duration={5}
         delay={1}
-        style={{ left: "calc(50% - 560px)", bottom: "80px" }}
+        style={{ left: "calc(50% - 600px)", bottom: "20px" }}
       />
-      <FloatingCard
+      <FloatingCardDark
         title="Sales Representative"
         badge="42 dni temu"
-        badgeStyle={{ background: "var(--accent-coral)", color: "white" }}
-        width={220}
-        height={140}
+        badgeStyle={{ background: "var(--hero-blue)", color: "white" }}
+        width={210}
+        height={135}
         rotate={5}
         duration={3.5}
         delay={1.5}
-        style={{ right: "calc(50% - 560px)", bottom: "70px" }}
+        style={{ right: "calc(50% - 580px)", bottom: "40px" }}
       />
 
       {/* Main content */}
-      <div className="relative w-full max-w-6xl mx-auto px-6 py-16 text-center" style={{ zIndex: 2 }}>
+      <div
+        className="relative w-full max-w-3xl mx-auto px-6 pt-6 pb-48 md:pb-64 text-center"
+        style={{ zIndex: 2 }}
+      >
         <div
-          className="inline-block text-[13px] font-semibold rounded-full px-4 py-1.5 mb-7"
-          style={{ background: "var(--accent-purple-soft)", color: "var(--accent-purple)" }}
+          className="text-[12px] font-bold uppercase tracking-[0.14em] mb-6"
+          style={{ color: "var(--hero-blue)" }}
         >
-          Co 5. oferta pracy w sieci to ghost job
+          Co 5. oferta pracy w sieci może być ghost jobem
         </div>
 
-        <h1 className="text-[62px] md:text-[84px] lg:text-[100px] font-black tracking-[-0.03em] leading-[0.97] mb-7 max-w-4xl mx-auto">
-          Nie trać czasu na oferty,{" "}
-          <span className="bg-gradient-to-r from-[#F27C5E] to-[#7C6FE8] bg-clip-text text-transparent">
-            których nie ma
-          </span>
+        <h1 className="text-[38px] sm:text-[46px] md:text-[52px] font-normal tracking-[-0.05em] leading-[1.05] text-white mb-6">
+          Nie trać czasu na oferty,
+          <br />
+          które nie ma
         </h1>
 
-        <p className="text-[18px] text-[#57564F] leading-relaxed max-w-[540px] mx-auto mb-10">
-          Analyss analizuje ogłoszenia w kilka sekund i mówi Ci wprost — warto
+        <p
+          className="text-[16px] md:text-[17px] leading-relaxed max-w-[500px] mx-auto mb-10"
+          style={{ color: "var(--hero-muted)" }}
+        >
+          Analyss analizuje ogłoszenia w kilka sekund i mówi Ci wprost: warto
           aplikować czy to strata czasu.
         </p>
 
-        <div className="flex flex-col items-center gap-3">
-          <a
-            href="#demo"
-            className="inline-block px-8 py-4 rounded-xl bg-black text-white font-bold text-[16px] hover:bg-[#1a1a1a] hover:-translate-y-0.5 transition-all duration-200"
+        <div
+          className="relative max-w-xl mx-auto rounded-2xl p-px overflow-hidden"
+          style={{ background: "var(--hero-border)" }}
+        >
+          {/* Jeżdżący błysk światła — obraca się pod treścią, prześwituje tylko na 1px ramce */}
+          <motion.div
+            className="absolute inset-[-60%] pointer-events-none"
+            style={{
+              background:
+                "conic-gradient(from 0deg, transparent 0%, transparent 85%, rgba(255,255,255,0.95) 90%, var(--hero-blue) 95%, transparent 100%)",
+            }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+          />
+
+          {/* Treść */}
+          <div
+            className="relative rounded-[15px] text-left"
+            style={{ background: "var(--hero-card-bg)" }}
           >
-            Sprawdź ofertę za darmo
-          </a>
-          <p className="text-[13px] text-[#9C9B93]">
-            3 darmowe analizy miesięcznie · Bez karty
-          </p>
+            <textarea
+              value={jobText}
+              onChange={(e) => setJobText(e.target.value)}
+              placeholder="Wklej treść ogłoszenia"
+              rows={5}
+              disabled={loading}
+              className="w-full bg-transparent text-white placeholder:text-[#5C5C66] text-[14px] resize-none outline-none p-4 pb-14"
+            />
+            <button
+              onClick={analyze}
+              disabled={loading}
+              className={`${ctaBtnClass} absolute bottom-3 right-3 px-4 py-2 disabled:opacity-50`}
+              style={{ background: "var(--hero-blue)" }}
+            >
+              {loading ? "Analizuję…" : "Sprawdź ofertę"}
+            </button>
+          </div>
         </div>
+
+        {error && <p className="text-[13px] text-red-400 mt-3">{error}</p>}
+
+        {limitReached && (
+          <div
+            className="max-w-xl mx-auto mt-4 rounded-2xl border p-5 text-left"
+            style={{
+              background: "var(--hero-card-bg)",
+              borderColor: "var(--hero-border)",
+            }}
+          >
+            <p className="text-[14px] text-white font-semibold mb-1">
+              Limit demo wyczerpany
+            </p>
+            <p
+              className="text-[13px] mb-4"
+              style={{ color: "var(--hero-muted)" }}
+            >
+              Zarejestruj się, aby otrzymać 3 analizy miesięcznie.
+            </p>
+            <Link
+              href="/register"
+              className={`${ctaBtnClass} inline-block px-4 py-2.5`}
+              style={{ background: "var(--hero-blue)" }}
+            >
+              Załóż darmowe konto
+            </Link>
+          </div>
+        )}
+
+        {result && (
+          <div
+            className="max-w-xl mx-auto mt-4 rounded-2xl border p-5 text-left"
+            style={{
+              background: "var(--hero-card-bg)",
+              borderColor: "var(--hero-border)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <span className="text-[15px] font-bold text-white">
+                {result.verdictLabel}
+              </span>
+              <span
+                className="text-[12px] font-bold px-2.5 py-1 rounded-full"
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  color: heroVerdictColor[result.verdict] ?? "#fff",
+                }}
+              >
+                {result.score}/6
+              </span>
+            </div>
+            <p
+              className="text-[13px] leading-relaxed mb-4"
+              style={{ color: "var(--hero-muted)" }}
+            >
+              {result.summary}
+            </p>
+            <Link
+              href="/register"
+              className={`${ctaBtnClass} inline-block px-4 py-2`}
+              style={{ background: "var(--hero-blue)" }}
+            >
+              Załóż darmowe konto
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -525,7 +571,6 @@ function Stats() {
       className="bg-white"
     >
       <div className="max-w-6xl mx-auto px-6 pt-20 pb-24">
-
         {/* Header row — split layout */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
           <div>
@@ -537,11 +582,14 @@ function Stats() {
               Skala problemu
             </div>
             <h2 className="text-[42px] md:text-[60px] font-black tracking-[-0.03em] leading-[1.02]">
-              Ghost joby<br />to nie mit
+              Ghost joby
+              <br />
+              to nie mit
             </h2>
           </div>
           <p className="text-[15px] text-[#6B6A63] leading-relaxed max-w-[260px] md:text-right md:pb-1">
-            Badania rynku pracy<br className="hidden md:block" /> pokazują skalę problemu
+            Badania rynku pracy
+            <br className="hidden md:block" /> pokazują skalę problemu
           </p>
         </div>
 
@@ -555,10 +603,16 @@ function Stats() {
               key={item.stat}
               className={[
                 "py-10 md:py-0",
-                i === 0 ? "md:pr-14 border-b md:border-b-0 md:border-r border-[#E8E7E2]" : "",
-                i === 1 ? "md:px-14 border-b md:border-b-0 md:border-r border-[#E8E7E2]" : "",
+                i === 0
+                  ? "md:pr-14 border-b md:border-b-0 md:border-r border-[#E8E7E2]"
+                  : "",
+                i === 1
+                  ? "md:px-14 border-b md:border-b-0 md:border-r border-[#E8E7E2]"
+                  : "",
                 i === 2 ? "md:pl-14" : "",
-              ].filter(Boolean).join(" ")}
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
               {/* The giant number */}
               <div
@@ -595,7 +649,6 @@ function Stats() {
             </div>
           ))}
         </div>
-
       </div>
     </motion.section>
   );
@@ -614,14 +667,24 @@ function DemoSection() {
       className="relative overflow-hidden"
     >
       {/* Animated gradient background */}
-      <div className="absolute inset-0 animate-gradient" style={{ opacity: 0.9 }} />
+      <div
+        className="absolute inset-0 animate-gradient"
+        style={{ opacity: 0.9 }}
+      />
 
       {/* Content */}
-      <div className="relative max-w-6xl mx-auto px-6 py-20" style={{ zIndex: 1 }}>
+      <div
+        className="relative max-w-6xl mx-auto px-6 py-20"
+        style={{ zIndex: 1 }}
+      >
         <div className="text-center mb-12">
           <div
             className="inline-block text-[12px] font-bold tracking-widest uppercase mb-4 rounded-full px-4 py-1.5"
-            style={{ background: "rgba(255,255,255,0.7)", color: "#57564F", backdropFilter: "blur(8px)" }}
+            style={{
+              background: "rgba(255,255,255,0.7)",
+              color: "#57564F",
+              backdropFilter: "blur(8px)",
+            }}
           >
             Live demo
           </div>
@@ -643,7 +706,16 @@ function DemoSection() {
 // SVG icons — Heroicons stroke style, 20×20 in 24-unit viewBox
 function IcoGhost() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 2a8 8 0 0 1 8 8v10l-3-2.5-2.5 2-2.5-2-2.5 2L9 17.5 6 20V10A8 8 0 0 1 12 2z" />
       <circle cx="9" cy="10.5" r="1" fill="currentColor" stroke="none" />
       <circle cx="15" cy="10.5" r="1" fill="currentColor" stroke="none" />
@@ -652,7 +724,16 @@ function IcoGhost() {
 }
 function IcoFileSearch() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
       <path d="M14 2v6h6" />
       <circle cx="11" cy="15" r="2.5" />
@@ -662,7 +743,16 @@ function IcoFileSearch() {
 }
 function IcoEye() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" />
       <circle cx="12" cy="12" r="3" />
     </svg>
@@ -670,14 +760,32 @@ function IcoEye() {
 }
 function IcoActivity() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
     </svg>
   );
 }
 function IcoCircleX() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="12" cy="12" r="10" />
       <path d="m15 9-6 6M9 9l6 6" />
     </svg>
@@ -685,7 +793,16 @@ function IcoCircleX() {
 }
 function IcoHistory() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M3 12a9 9 0 1 0 2.7-6.4L3 3v6h6" />
       <path d="M12 7v5l3.5 2" />
     </svg>
@@ -753,7 +870,12 @@ function FeatureCard({
 
 // Ghost jobs detected in the hero card — mini UI mock
 const ghostJobsMock = [
-  { role: "Senior Developer", company: "TechCorp", days: "127 dni", ghost: true },
+  {
+    role: "Senior Developer",
+    company: "TechCorp",
+    days: "127 dni",
+    ghost: true,
+  },
   { role: "Marketing Lead", company: "BrandCo", days: "4 dni", ghost: false },
   { role: "QA Engineer", company: "Allegro", days: "91 dni", ghost: true },
   { role: "UX Designer", company: "UXLab", days: "12 dni", ghost: false },
@@ -761,9 +883,24 @@ const ghostJobsMock = [
 
 // History rows for the last card — mini UI mock
 const historyMock = [
-  { role: "Senior Developer • TechCorp", verdict: "danger", label: "Widmo", date: "wczoraj" },
-  { role: "UX Designer • UXLab", verdict: "safe", label: "OK", date: "2 dni temu" },
-  { role: "PM • StartupXYZ", verdict: "warning", label: "Uwaga", date: "5 dni temu" },
+  {
+    role: "Senior Developer • TechCorp",
+    verdict: "danger",
+    label: "Widmo",
+    date: "wczoraj",
+  },
+  {
+    role: "UX Designer • UXLab",
+    verdict: "safe",
+    label: "OK",
+    date: "2 dni temu",
+  },
+  {
+    role: "PM • StartupXYZ",
+    verdict: "warning",
+    label: "Uwaga",
+    date: "5 dni temu",
+  },
 ];
 const historyColor: Record<string, { bg: string; text: string }> = {
   danger: { bg: "rgba(242,124,94,0.12)", text: "var(--accent-coral)" },
@@ -807,22 +944,23 @@ function Features() {
 
         {/* Bento grid */}
         <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
-
           {/* ── Card 1 — large hero card ────────────────────────────────── */}
-          <div
-            className="lg:col-span-4 bg-white rounded-2xl p-8 relative overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.04)]"
-          >
+          <div className="lg:col-span-4 bg-white rounded-2xl p-8 relative overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.04)]">
             {/* Background glow */}
             <div
               className="absolute -top-16 -right-16 w-64 h-64 rounded-full pointer-events-none"
               style={{
-                background: "radial-gradient(circle, rgba(124,111,232,0.1) 0%, transparent 70%)",
+                background:
+                  "radial-gradient(circle, rgba(124,111,232,0.1) 0%, transparent 70%)",
               }}
             />
 
             {/* Header */}
             <div className="flex items-start gap-4 mb-6">
-              <IconPill bg="linear-gradient(135deg, #E9E5FE, #D4CFFB)" color="var(--accent-purple)">
+              <IconPill
+                bg="linear-gradient(135deg, #E9E5FE, #D4CFFB)"
+                color="var(--accent-purple)"
+              >
                 <IcoGhost />
               </IconPill>
               <div>
@@ -839,7 +977,8 @@ function Features() {
             </div>
 
             <p className="text-[14px] text-[#6B6A63] leading-[1.65] mb-7 max-w-xs">
-              Ogłoszenia, które wiszą miesiącami i wracają, mimo że nikt nie jest zatrudniany.
+              Ogłoszenia, które wiszą miesiącami i wracają, mimo że nikt nie
+              jest zatrudniany.
             </p>
 
             {/* Mini job list mock */}
@@ -853,17 +992,30 @@ function Features() {
                   <div className="flex items-center gap-2.5">
                     <div
                       className="w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{ background: job.ghost ? "var(--accent-coral)" : "#16A34A" }}
+                      style={{
+                        background: job.ghost
+                          ? "var(--accent-coral)"
+                          : "#16A34A",
+                      }}
                     />
-                    <span className="text-[12px] font-medium text-[#0A0A0A]">{job.role}</span>
-                    <span className="text-[11px] text-[#9C9B93] hidden sm:inline">· {job.company}</span>
+                    <span className="text-[12px] font-medium text-[#0A0A0A]">
+                      {job.role}
+                    </span>
+                    <span className="text-[11px] text-[#9C9B93] hidden sm:inline">
+                      · {job.company}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[11px] text-[#9C9B93]">{job.days}</span>
+                    <span className="text-[11px] text-[#9C9B93]">
+                      {job.days}
+                    </span>
                     {job.ghost && (
                       <span
                         className="text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide"
-                        style={{ background: "rgba(242,124,94,0.13)", color: "var(--accent-coral)" }}
+                        style={{
+                          background: "rgba(242,124,94,0.13)",
+                          color: "var(--accent-coral)",
+                        }}
                       >
                         WIDMO
                       </span>
@@ -923,12 +1075,18 @@ function Features() {
             {/* Gradient top strip */}
             <div
               className="h-[3px]"
-              style={{ background: "linear-gradient(90deg, var(--accent-purple), var(--accent-coral))" }}
+              style={{
+                background:
+                  "linear-gradient(90deg, var(--accent-purple), var(--accent-coral))",
+              }}
             />
             <div className="p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
               {/* Left: text */}
               <div className="flex items-start gap-4 flex-1 min-w-0">
-                <IconPill bg="linear-gradient(135deg, #E8F4D6, #D4EDBE)" color="#5A7A1E">
+                <IconPill
+                  bg="linear-gradient(135deg, #E8F4D6, #D4EDBE)"
+                  color="#5A7A1E"
+                >
                   <IcoHistory />
                 </IconPill>
                 <div>
@@ -939,7 +1097,8 @@ function Features() {
                     Historia analiz
                   </h3>
                   <p className="text-[13px] text-[#6B6A63] leading-relaxed">
-                    Wszystkie sprawdzone oferty w jednym miejscu — wracaj do nich kiedy chcesz.
+                    Wszystkie sprawdzone oferty w jednym miejscu — wracaj do
+                    nich kiedy chcesz.
                   </p>
                 </div>
               </div>
@@ -954,9 +1113,13 @@ function Features() {
                       className="flex items-center justify-between rounded-xl px-3.5 py-2.5"
                       style={{ background: "#F7F6F4" }}
                     >
-                      <span className="text-[12px] font-medium text-[#0A0A0A] truncate mr-3">{row.role}</span>
+                      <span className="text-[12px] font-medium text-[#0A0A0A] truncate mr-3">
+                        {row.role}
+                      </span>
                       <div className="flex items-center gap-2.5 shrink-0">
-                        <span className="text-[11px] text-[#9C9B93]">{row.date}</span>
+                        <span className="text-[11px] text-[#9C9B93]">
+                          {row.date}
+                        </span>
                         <span
                           className="text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide"
                           style={{ background: vc.bg, color: vc.text }}
@@ -970,7 +1133,6 @@ function Features() {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </motion.section>
@@ -1004,8 +1166,12 @@ function Pricing() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl mx-auto">
         {/* Free */}
         <div className="bg-white rounded-3xl p-8 flex flex-col shadow-sm">
-          <div className="text-[13px] font-bold text-[#6B6A63] mb-2">Darmowy</div>
-          <div className="text-[44px] font-black tracking-tight leading-none mb-1">0 zł</div>
+          <div className="text-[13px] font-bold text-[#6B6A63] mb-2">
+            Darmowy
+          </div>
+          <div className="text-[44px] font-black tracking-tight leading-none mb-1">
+            0 zł
+          </div>
           <div className="text-[14px] text-[#9C9B93] mb-8">na zawsze</div>
           <ul className="flex flex-col gap-3 mb-8 flex-1">
             {[
@@ -1013,7 +1179,10 @@ function Pricing() {
               "Pełen werdykt i 6 kryteriów",
               "Historia analiz",
             ].map((f) => (
-              <li key={f} className="flex items-center gap-2.5 text-[14px] text-[#57564F]">
+              <li
+                key={f}
+                className="flex items-center gap-2.5 text-[14px] text-[#57564F]"
+              >
                 <span className="text-[#16A34A] font-bold text-[16px]">✓</span>
                 {f}
               </li>
@@ -1044,11 +1213,14 @@ function Pricing() {
           <div
             className="rounded-[22px] p-8 flex flex-col h-full"
             style={{
-              background: "linear-gradient(135deg, rgba(124,111,232,0.05) 0%, rgba(242,124,94,0.05) 100%), white",
+              background:
+                "linear-gradient(135deg, rgba(124,111,232,0.05) 0%, rgba(242,124,94,0.05) 100%), white",
             }}
           >
             <div className="text-[13px] font-bold text-[#6B6A63] mb-2">Pro</div>
-            <div className="text-[44px] font-black tracking-tight leading-none mb-1">29 zł</div>
+            <div className="text-[44px] font-black tracking-tight leading-none mb-1">
+              29 zł
+            </div>
             <div className="text-[14px] text-[#9C9B93] mb-8">/miesiąc</div>
             <ul className="flex flex-col gap-3 mb-8 flex-1">
               {[
@@ -1057,8 +1229,13 @@ function Pricing() {
                 "Historia analiz + eksport",
                 "Priorytetowa analiza AI",
               ].map((f) => (
-                <li key={f} className="flex items-center gap-2.5 text-[14px] text-[#57564F]">
-                  <span className="text-[#16A34A] font-bold text-[16px]">✓</span>
+                <li
+                  key={f}
+                  className="flex items-center gap-2.5 text-[14px] text-[#57564F]"
+                >
+                  <span className="text-[#16A34A] font-bold text-[16px]">
+                    ✓
+                  </span>
                   {f}
                 </li>
               ))}
@@ -1118,15 +1295,26 @@ function CtaFinal() {
       {/* Glow blob — top left */}
       <div
         className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: "var(--accent-purple)", filter: "blur(120px)", opacity: 0.4 }}
+        style={{
+          background: "var(--accent-purple)",
+          filter: "blur(120px)",
+          opacity: 0.4,
+        }}
       />
       {/* Glow blob — bottom right */}
       <div
         className="absolute bottom-[-100px] right-[-100px] w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: "var(--accent-coral)", filter: "blur(120px)", opacity: 0.4 }}
+        style={{
+          background: "var(--accent-coral)",
+          filter: "blur(120px)",
+          opacity: 0.4,
+        }}
       />
 
-      <div className="relative max-w-6xl mx-auto px-6 py-24 text-center" style={{ zIndex: 1 }}>
+      <div
+        className="relative max-w-6xl mx-auto px-6 py-24 text-center"
+        style={{ zIndex: 1 }}
+      >
         <h2 className="text-[42px] md:text-[64px] font-black tracking-[-0.03em] leading-[1.02] mb-5">
           Przestań tracić czas
           <br />
@@ -1163,9 +1351,24 @@ function Footer() {
         <Logo />
         <p className="text-[13px] text-[#9C9B93]">© 2025 Analyss</p>
         <nav className="flex items-center gap-5 text-[13px] text-[#6B6A63]">
-          <Link href="/regulamin" className="hover:text-[#0A0A0A] transition-colors">Regulamin</Link>
-          <Link href="/prywatnosc" className="hover:text-[#0A0A0A] transition-colors">Prywatność</Link>
-          <a href="mailto:kontakt@analyss.pl" className="hover:text-[#0A0A0A] transition-colors">Kontakt</a>
+          <Link
+            href="/regulamin"
+            className="hover:text-[#0A0A0A] transition-colors"
+          >
+            Regulamin
+          </Link>
+          <Link
+            href="/prywatnosc"
+            className="hover:text-[#0A0A0A] transition-colors"
+          >
+            Prywatność
+          </Link>
+          <a
+            href="mailto:kontakt@analyss.pl"
+            className="hover:text-[#0A0A0A] transition-colors"
+          >
+            Kontakt
+          </a>
         </nav>
       </div>
     </footer>
@@ -1194,8 +1397,8 @@ function AnimatedBackground() {
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      mouseX.set((e.clientX / window.innerWidth) - 0.5);
-      mouseY.set((e.clientY / window.innerHeight) - 0.5);
+      mouseX.set(e.clientX / window.innerWidth - 0.5);
+      mouseY.set(e.clientY / window.innerHeight - 0.5);
     };
     window.addEventListener("mousemove", onMove);
     return () => window.removeEventListener("mousemove", onMove);
@@ -1203,47 +1406,92 @@ function AnimatedBackground() {
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-
       {/* Orb 1 — purple, top-left */}
-      <motion.div className="absolute" style={{ x: o1x, y: o1y, top: "-420px", left: "-380px" }}>
+      <motion.div
+        className="absolute"
+        style={{ x: o1x, y: o1y, top: "-420px", left: "-380px" }}
+      >
         <motion.div
           className="rounded-full"
-          style={{ width: 1100, height: 1100, background: "radial-gradient(circle, rgba(124,111,232,0.14) 0%, transparent 60%)" }}
+          style={{
+            width: 1100,
+            height: 1100,
+            background:
+              "radial-gradient(circle, rgba(124,111,232,0.14) 0%, transparent 60%)",
+          }}
           animate={{ x: [0, 120, -60, 0], y: [0, 90, -70, 0] }}
           transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
         />
       </motion.div>
 
       {/* Orb 2 — coral, top-right */}
-      <motion.div className="absolute" style={{ x: o2x, y: o2y, top: "-180px", right: "-320px" }}>
+      <motion.div
+        className="absolute"
+        style={{ x: o2x, y: o2y, top: "-180px", right: "-320px" }}
+      >
         <motion.div
           className="rounded-full"
-          style={{ width: 900, height: 900, background: "radial-gradient(circle, rgba(242,124,94,0.12) 0%, transparent 60%)" }}
+          style={{
+            width: 900,
+            height: 900,
+            background:
+              "radial-gradient(circle, rgba(242,124,94,0.12) 0%, transparent 60%)",
+          }}
           animate={{ x: [0, -90, 55, 0], y: [0, 110, -80, 0] }}
-          transition={{ duration: 26, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+          transition={{
+            duration: 26,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 4,
+          }}
         />
       </motion.div>
 
       {/* Orb 3 — lime, mid-page */}
-      <motion.div className="absolute" style={{ x: o3x, y: o3y, top: "38%", left: "22%" }}>
+      <motion.div
+        className="absolute"
+        style={{ x: o3x, y: o3y, top: "38%", left: "22%" }}
+      >
         <motion.div
           className="rounded-full"
-          style={{ width: 750, height: 750, background: "radial-gradient(circle, rgba(232,244,214,0.35) 0%, transparent 60%)" }}
+          style={{
+            width: 750,
+            height: 750,
+            background:
+              "radial-gradient(circle, rgba(232,244,214,0.35) 0%, transparent 60%)",
+          }}
           animate={{ x: [0, 70, -80, 0], y: [0, -70, 90, 0] }}
-          transition={{ duration: 36, repeat: Infinity, ease: "easeInOut", delay: 9 }}
+          transition={{
+            duration: 36,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 9,
+          }}
         />
       </motion.div>
 
       {/* Orb 4 — purple, bottom-right */}
-      <motion.div className="absolute" style={{ x: o4x, y: o4y, bottom: "8%", right: "-280px" }}>
+      <motion.div
+        className="absolute"
+        style={{ x: o4x, y: o4y, bottom: "8%", right: "-280px" }}
+      >
         <motion.div
           className="rounded-full"
-          style={{ width: 950, height: 950, background: "radial-gradient(circle, rgba(124,111,232,0.09) 0%, transparent 60%)" }}
+          style={{
+            width: 950,
+            height: 950,
+            background:
+              "radial-gradient(circle, rgba(124,111,232,0.09) 0%, transparent 60%)",
+          }}
           animate={{ x: [0, -110, 65, 0], y: [0, -65, 85, 0] }}
-          transition={{ duration: 32, repeat: Infinity, ease: "easeInOut", delay: 14 }}
+          transition={{
+            duration: 32,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 14,
+          }}
         />
       </motion.div>
-
     </div>
   );
 }
@@ -1252,13 +1500,10 @@ function AnimatedBackground() {
 
 export default function LandingPage() {
   return (
-    <div className="relative bg-[#F1F0EE] text-[#0A0A0A] overflow-x-hidden pt-20 dot-grid">
+    <div className="relative bg-[#F1F0EE] text-[#0A0A0A] overflow-x-hidden dot-grid">
       <AnimatedBackground />
-      <Nav />
-      <Hero />
-      <LiveStatsSection />
+      <HeroDark />
       <Stats />
-      <DemoSection />
       <Features />
       <Pricing />
       <Faq />

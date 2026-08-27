@@ -1,5 +1,6 @@
 @import "tailwindcss";
 :root {
+  --font-helvetica: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
   --background: #ffffff;
   --foreground: #171717;
   --accent-purple: #7C6FE8;
@@ -7,13 +8,21 @@
   --accent-coral: #F27C5E;
   --accent-coral-soft: #FCE7DE;
   --accent-lime-soft: #E8F4D6;
+
+  /* Nowy design system (dark/blue) — na razie używany w Hero */
+  --hero-bg: #030304;
+  --hero-card-bg: #0A0A0C;
+  --hero-border: #232326;
+  --hero-fg: #FFFFFF;
+  --hero-muted: #9A9AA3;
+  --hero-blue: #2F6FED;
+  --hero-blue-soft: rgba(47, 111, 237, 0.12);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-helvetica);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,12 +35,20 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-helvetica);
 }
 
 .dot-grid {
   background-image: radial-gradient(circle, rgba(0,0,0,0.07) 1px, transparent 1px);
   background-size: 28px 28px;
+}
+
+.hero-dark-bg {
+  background-color: var(--hero-bg);
+  background-image:
+    radial-gradient(60% 55% at 14% 105%, rgba(35, 82, 196, 0.4) 0%, transparent 70%),
+    radial-gradient(55% 50% at 86% 108%, rgba(28, 66, 168, 0.32) 0%, transparent 70%),
+    radial-gradient(80% 60% at 50% 120%, rgba(16, 38, 96, 0.4) 0%, transparent 75%);
 }
 
 @keyframes gradient-shift {
