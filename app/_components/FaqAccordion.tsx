@@ -33,18 +33,20 @@ export default function FaqAccordion() {
       {faqs.map((item, i) => (
         <div
           key={i}
-          className="bg-white border border-[#ECEAE3] rounded-2xl overflow-hidden"
+          className="rounded-2xl overflow-hidden"
+          style={{ background: "var(--hero-card-bg)" }}
         >
           <button
             onClick={() => setOpen(open === i ? null : i)}
             className="w-full flex items-center justify-between px-6 py-5 text-left gap-4"
           >
-            <span className="font-semibold text-[15px] text-[#0A0A0A]">
+            <span className="font-semibold text-[15px] text-white">
               {item.q}
             </span>
             <span
-              className="shrink-0 text-[#6B6A63] transition-transform duration-200"
+              className="shrink-0 transition-transform duration-200"
               style={{
+                color: "var(--hero-muted)",
                 transform: open === i ? "rotate(180deg)" : "rotate(0deg)",
               }}
             >
@@ -61,7 +63,7 @@ export default function FaqAccordion() {
           </button>
           {open === i && (
             <div className="px-6 pb-5">
-              <p className="text-[14px] text-[#57564F] leading-relaxed">
+              <p className="text-[14px] leading-relaxed" style={{ color: "var(--hero-muted)" }}>
                 {item.a}
               </p>
             </div>

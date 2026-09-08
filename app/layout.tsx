@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Providers } from "./providers";
+import { figtree, montserrat, jetbrainsMono } from "./fonts";
 
 export const metadata: Metadata = {
   title: "Analyss – sprawdź czy oferta pracy to ghost job",
@@ -13,8 +15,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pl" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html
+      lang="pl"
+      className={`h-full antialiased ${figtree.variable} ${montserrat.variable} ${jetbrainsMono.variable}`}
+    >
+      <body className="min-h-full flex flex-col">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

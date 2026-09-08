@@ -22,12 +22,6 @@ const verdictDot: Record<string, string> = {
   danger: "#DC2626",
 };
 
-const verdictBg: Record<string, string> = {
-  safe: "#F0FDF4",
-  warning: "#FFFBEB",
-  danger: "#FEF2F2",
-};
-
 function timeAgo(iso: string) {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
   if (diff < 60) return "przed chwilą";
@@ -81,7 +75,7 @@ export default function AppSidebar({
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-20 md:hidden"
+          className="fixed inset-0 bg-black/50 z-20 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -89,21 +83,20 @@ export default function AppSidebar({
       <aside
         className={`
           fixed md:static inset-y-0 left-0 z-30
-          w-64 flex flex-col bg-white border-r border-[#ECEAE3]
+          w-64 flex flex-col border-r
           transform transition-transform duration-200
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
+        style={{ background: "var(--hero-bg)", borderColor: "var(--hero-border)" }}
       >
         {/* Logo */}
-        <div className="px-5 py-5 border-b border-[#ECEAE3] shrink-0">
+        <div className="px-5 py-5 border-b shrink-0" style={{ borderColor: "var(--hero-border)" }}>
           <Link href="/" className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-[9px] text-white flex items-center justify-center font-black text-[17px]"
-              style={{ background: "linear-gradient(135deg, #7C6FE8, #F27C5E)" }}
+            <span
+              className="font-bold text-[19px] tracking-tight text-white [font-family:var(--font-heading)]"
             >
-              A
-            </div>
-            <span className="font-bold text-[19px] tracking-tight text-[#0A0A0A]">Analyss</span>
+              Analyss
+            </span>
           </Link>
         </div>
 
@@ -117,12 +110,18 @@ export default function AppSidebar({
                 onNewAnalysis?.();
                 setSidebarOpen(false);
               }}
-              className={`
-                flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-[14px] transition-colors
-                ${isApp
-                  ? "bg-black text-white"
-                  : "bg-[#F5F4EF] text-[#0A0A0A] hover:bg-[#ECEAE3]"}
-              `}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-[14px] transition-colors [font-family:var(--font-heading)]"
+              style={
+                isApp
+                  ? { background: "var(--hero-blue)", color: "#fff" }
+                  : { color: "var(--hero-muted)" }
+              }
+              onMouseEnter={(e) => {
+                if (!isApp) e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+              }}
+              onMouseLeave={(e) => {
+                if (!isApp) e.currentTarget.style.background = "transparent";
+              }}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -133,12 +132,24 @@ export default function AppSidebar({
             <Link
               href="/historia"
               onClick={() => setSidebarOpen(false)}
-              className={`
-                flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-[14px] transition-colors
-                ${isHistoria
-                  ? "bg-[#F5F4EF] text-[#0A0A0A] font-semibold"
-                  : "text-[#57564F] hover:bg-[#F5F4EF] hover:text-[#0A0A0A]"}
-              `}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-[14px] transition-colors [font-family:var(--font-heading)]"
+              style={
+                isHistoria
+                  ? { background: "rgba(255,255,255,0.08)", color: "#fff", fontWeight: 600 }
+                  : { color: "var(--hero-muted)" }
+              }
+              onMouseEnter={(e) => {
+                if (!isHistoria) {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                  e.currentTarget.style.color = "#fff";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isHistoria) {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "var(--hero-muted)";
+                }
+              }}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <rect x="2" y="3" width="12" height="2" rx="1" fill="currentColor" />
@@ -151,12 +162,24 @@ export default function AppSidebar({
             <Link
               href="/cv"
               onClick={() => setSidebarOpen(false)}
-              className={`
-                flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-[14px] transition-colors
-                ${isCv
-                  ? "bg-[#F5F4EF] text-[#0A0A0A] font-semibold"
-                  : "text-[#57564F] hover:bg-[#F5F4EF] hover:text-[#0A0A0A]"}
-              `}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-[14px] transition-colors [font-family:var(--font-heading)]"
+              style={
+                isCv
+                  ? { background: "rgba(255,255,255,0.08)", color: "#fff", fontWeight: 600 }
+                  : { color: "var(--hero-muted)" }
+              }
+              onMouseEnter={(e) => {
+                if (!isCv) {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                  e.currentTarget.style.color = "#fff";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isCv) {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "var(--hero-muted)";
+                }
+              }}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <rect x="2" y="1" width="12" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
@@ -167,12 +190,12 @@ export default function AppSidebar({
           </div>
 
           {/* Separator */}
-          <div className="mx-3 border-t border-[#ECEAE3] shrink-0" />
+          <div className="mx-3 border-t shrink-0" style={{ borderColor: "var(--hero-border)" }} />
 
           {/* Lista analiz */}
           <div className="flex-1 overflow-y-auto px-3 py-2">
             {analyses.length === 0 ? (
-              <p className="text-[12px] text-[#9C9B93] px-3 py-3">
+              <p className="text-[12px] px-3 py-3" style={{ color: "var(--hero-muted)" }}>
                 Brak analiz. Sprawdź pierwszą ofertę!
               </p>
             ) : (
@@ -183,24 +206,26 @@ export default function AppSidebar({
                     href={`/historia/${a.id}`}
                     onClick={() => setSidebarOpen(false)}
                     className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl transition-colors"
-                    style={{ background: verdictBg[a.verdict] ?? "#F5F4EF" }}
+                    style={{ background: "rgba(255,255,255,0.03)" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.07)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}
                   >
                     {/* Verdict dot */}
                     <div
                       className="w-2 h-2 rounded-full mt-1.5 shrink-0"
-                      style={{ background: verdictDot[a.verdict] ?? "#9C9B93" }}
+                      style={{ background: verdictDot[a.verdict] ?? "var(--hero-muted)" }}
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="text-[13px] font-medium text-[#0A0A0A] truncate leading-snug">
+                      <div className="text-[13px] font-medium text-white truncate leading-snug">
                         {a.company || "Bez nazwy firmy"}
                       </div>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[11px] text-[#9C9B93]">
+                        <span className="text-[11px]" style={{ color: "var(--hero-muted)" }}>
                           {a.verdict_label ?? a.verdict}
                           {a.score != null ? ` · ${a.score}/6` : ""}
                         </span>
-                        <span className="text-[#BFBDB6] text-[10px]">·</span>
-                        <span className="text-[11px] text-[#9C9B93]">
+                        <span className="text-[10px]" style={{ color: "var(--hero-border)" }}>·</span>
+                        <span className="text-[11px]" style={{ color: "var(--hero-muted)" }}>
                           {timeAgo(a.created_at)}
                         </span>
                       </div>
@@ -213,21 +238,33 @@ export default function AppSidebar({
         </div>
 
         {/* User + logout */}
-        <div className="px-3 py-4 border-t border-[#ECEAE3] shrink-0">
+        <div className="px-3 py-4 border-t shrink-0" style={{ borderColor: "var(--hero-border)" }}>
           <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
-            <div className="w-7 h-7 rounded-full bg-[#ECEAE3] flex items-center justify-center text-[12px] font-bold text-[#57564F] shrink-0">
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold text-white shrink-0"
+              style={{ background: "rgba(255,255,255,0.08)" }}
+            >
               {(user.nickname ?? user.email ?? "?")[0].toUpperCase()}
             </div>
             <div className="min-w-0">
-              <div className="text-[13px] font-semibold truncate">
+              <div className="text-[13px] font-semibold truncate text-white">
                 {user.nickname ?? "Użytkownik"}
               </div>
-              <div className="text-[11px] text-[#9C9B93] truncate">{user.email}</div>
+              <div className="text-[11px] truncate" style={{ color: "var(--hero-muted)" }}>{user.email}</div>
             </div>
           </div>
           <button
             onClick={logout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#57564F] text-[13px] font-medium hover:bg-[#FEF2F2] hover:text-[#991B1B] transition-colors"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-colors"
+            style={{ color: "var(--hero-muted)" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(239,68,68,0.1)";
+              e.currentTarget.style.color = "#F87171";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "var(--hero-muted)";
+            }}
           >
             <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
               <path

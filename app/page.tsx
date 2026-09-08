@@ -84,7 +84,7 @@ function HeroNav() {
               <Link
                 href="/app"
                 className={`${ctaBtnClass} px-5 py-2.5`}
-                style={{ background: "var(--hero-blue)" }}
+                style={{ background: "var(--color-accent)" }}
               >
                 Otwórz apkę
               </Link>
@@ -106,7 +106,7 @@ function HeroNav() {
               <Link
                 href="/register"
                 className={`${ctaBtnClass} px-5 py-2.5`}
-                style={{ background: "var(--hero-blue)" }}
+                style={{ background: "var(--color-accent)" }}
               >
                 Wypróbuj za darmo
               </Link>
@@ -177,7 +177,7 @@ function HeroNav() {
                     href="/app"
                     onClick={() => setOpen(false)}
                     className={`${ctaBtnClass} mt-1 mx-1 px-4 py-3.5 text-center`}
-                    style={{ background: "var(--hero-blue)" }}
+                    style={{ background: "var(--color-accent)" }}
                   >
                     Otwórz apkę
                   </Link>
@@ -204,7 +204,7 @@ function HeroNav() {
                     href="/register"
                     onClick={() => setOpen(false)}
                     className={`${ctaBtnClass} mt-1 mx-1 px-4 py-3.5 text-center`}
-                    style={{ background: "var(--hero-blue)" }}
+                    style={{ background: "var(--color-accent)" }}
                   >
                     Wypróbuj za darmo
                   </Link>
@@ -454,7 +454,7 @@ function HeroDark() {
               onClick={analyze}
               disabled={loading}
               className={`${ctaBtnClass} absolute bottom-3 right-3 px-4 py-2 disabled:opacity-50`}
-              style={{ background: "var(--hero-blue)" }}
+              style={{ background: "var(--color-accent)" }}
             >
               {loading ? "Analizuję…" : "Sprawdź ofertę"}
             </button>
@@ -483,7 +483,7 @@ function HeroDark() {
             <Link
               href="/register"
               className={`${ctaBtnClass} inline-block px-4 py-2.5`}
-              style={{ background: "var(--hero-blue)" }}
+              style={{ background: "var(--color-accent)" }}
             >
               Załóż darmowe konto
             </Link>
@@ -521,7 +521,7 @@ function HeroDark() {
             <Link
               href="/register"
               className={`${ctaBtnClass} inline-block px-4 py-2`}
-              style={{ background: "var(--hero-blue)" }}
+              style={{ background: "var(--color-accent)" }}
             >
               Załóż darmowe konto
             </Link>
@@ -540,24 +540,18 @@ const statsItems = [
     label: "ofert to ghost joby",
     desc: "ofert online to ogłoszenia bez realnego procesu rekrutacji",
     source: "Clarify Capital, 2024",
-    color: "var(--accent-coral)",
-    gradientClass: "from-[#F27C5E] to-[#E85A3C]",
   },
   {
     stat: "43 dni",
     label: "marnowane na szukanie",
     desc: "tyle traci przeciętny kandydat aplikując na fałszywe oferty w Polsce",
     source: "dane rynkowe",
-    color: "var(--accent-purple)",
-    gradientClass: "from-[#7C6FE8] to-[#5B4ED4]",
   },
   {
     stat: "1 na 5",
     label: "kandydatów nie wie",
     desc: "osób wysyła CV nie świadomych, że oferta nie prowadzi do zatrudnienia",
     source: "",
-    color: "#5A7A1E",
-    gradientClass: "from-[#6B8E23] to-[#4E6A18]",
   },
 ];
 
@@ -568,33 +562,38 @@ function Stats() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="bg-white"
     >
       <div className="max-w-6xl mx-auto px-6 pt-20 pb-24">
         {/* Header row — split layout */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
           <div>
-            <div className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.12em] uppercase text-[#6B6A63] mb-4">
+            <div
+              className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.12em] uppercase mb-4"
+              style={{ color: "var(--hero-muted)" }}
+            >
               <span
                 className="w-4 h-[1.5px] rounded-full inline-block"
-                style={{ background: "var(--accent-coral)" }}
+                style={{ background: "var(--color-accent)" }}
               />
               Skala problemu
             </div>
-            <h2 className="text-[42px] md:text-[60px] font-black tracking-[-0.03em] leading-[1.02]">
+            <h2 className="text-[42px] md:text-[60px] font-black tracking-[-0.03em] leading-[1.02] text-white">
               Ghost joby
               <br />
               to nie mit
             </h2>
           </div>
-          <p className="text-[15px] text-[#6B6A63] leading-relaxed max-w-[260px] md:text-right md:pb-1">
+          <p
+            className="text-[15px] leading-relaxed max-w-[260px] md:text-right md:pb-1"
+            style={{ color: "var(--hero-muted)" }}
+          >
             Badania rynku pracy
             <br className="hidden md:block" /> pokazują skalę problemu
           </p>
         </div>
 
         {/* Thin rule */}
-        <div className="h-px bg-[#E8E7E2] mb-14" />
+        <div className="h-px mb-14" style={{ background: "var(--hero-border)" }} />
 
         {/* Big stat columns */}
         <div className="grid grid-cols-1 md:grid-cols-3">
@@ -603,46 +602,47 @@ function Stats() {
               key={item.stat}
               className={[
                 "py-10 md:py-0",
-                i === 0
-                  ? "md:pr-14 border-b md:border-b-0 md:border-r border-[#E8E7E2]"
-                  : "",
-                i === 1
-                  ? "md:px-14 border-b md:border-b-0 md:border-r border-[#E8E7E2]"
-                  : "",
+                i === 0 ? "md:pr-14 border-b md:border-b-0 md:border-r" : "",
+                i === 1 ? "md:px-14 border-b md:border-b-0 md:border-r" : "",
                 i === 2 ? "md:pl-14" : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
+              style={{ borderColor: "var(--hero-border)" }}
             >
               {/* The giant number */}
-              <div
-                className={`text-[80px] md:text-[104px] lg:text-[120px] font-black tracking-[-0.04em] leading-[0.82] mb-3 bg-gradient-to-br ${item.gradientClass} bg-clip-text text-transparent`}
-              >
+              <div className="text-[80px] md:text-[104px] lg:text-[120px] font-black tracking-[-0.04em] leading-[0.82] mb-3 text-white">
                 {item.stat}
               </div>
 
               {/* Accent underbar */}
               <div
                 className="w-14 h-[3px] rounded-full mb-5"
-                style={{ background: item.color }}
+                style={{ background: "var(--color-accent)" }}
               />
 
               {/* Label */}
               <div
                 className="text-[11px] font-bold tracking-[0.09em] uppercase mb-3"
-                style={{ color: item.color }}
+                style={{ color: "var(--color-accent)" }}
               >
                 {item.label}
               </div>
 
               {/* Description */}
-              <p className="text-[14px] text-[#57564F] leading-[1.65] max-w-[220px]">
+              <p
+                className="text-[14px] leading-[1.65] max-w-[220px]"
+                style={{ color: "var(--hero-muted)" }}
+              >
                 {item.desc}
               </p>
 
               {/* Source */}
               {item.source && (
-                <p className="text-[11px] text-[#B0AFA9] font-medium mt-3 tracking-wide">
+                <p
+                  className="text-[11px] font-medium mt-3 tracking-wide"
+                  style={{ color: "var(--hero-muted)", opacity: 0.7 }}
+                >
                   {item.source}
                 </p>
               )}
@@ -848,7 +848,10 @@ function FeatureCard({
   iconColor: string;
 }) {
   return (
-    <div className="lg:col-span-2 bg-white rounded-2xl p-7 flex flex-col gap-4 shadow-[0_1px_4px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06),0_8px_24px_rgba(0,0,0,0.06)] transition-shadow duration-300">
+    <div
+      className="lg:col-span-2 rounded-2xl p-7 flex flex-col gap-4 transition-colors duration-300"
+      style={{ background: "var(--hero-card-bg)" }}
+    >
       <IconPill bg={iconBg} color={iconColor}>
         {icon}
       </IconPill>
@@ -859,10 +862,12 @@ function FeatureCard({
         >
           {tag}
         </div>
-        <h3 className="text-[15px] font-bold tracking-tight text-[#0A0A0A] mb-1.5 leading-snug">
+        <h3 className="text-[15px] font-bold tracking-tight text-white mb-1.5 leading-snug">
           {title}
         </h3>
-        <p className="text-[13px] text-[#6B6A63] leading-[1.65]">{desc}</p>
+        <p className="text-[13px] leading-[1.65]" style={{ color: "var(--hero-muted)" }}>
+          {desc}
+        </p>
       </div>
     </div>
   );
@@ -903,9 +908,9 @@ const historyMock = [
   },
 ];
 const historyColor: Record<string, { bg: string; text: string }> = {
-  danger: { bg: "rgba(242,124,94,0.12)", text: "var(--accent-coral)" },
-  safe: { bg: "rgba(22,163,74,0.1)", text: "#16A34A" },
-  warning: { bg: "rgba(217,119,6,0.1)", text: "#D97706" },
+  danger: { bg: "rgba(220,38,38,0.14)", text: "#F87171" },
+  safe: { bg: "rgba(22,163,74,0.14)", text: "#4ADE80" },
+  warning: { bg: "rgba(217,119,6,0.14)", text: "#FBBF24" },
 };
 
 function Features() {
@@ -920,24 +925,27 @@ function Features() {
       <div className="max-w-6xl mx-auto px-6 py-20">
         {/* Section header */}
         <div className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.12em] uppercase text-[#6B6A63] mb-5">
+          <div
+            className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.12em] uppercase mb-5"
+            style={{ color: "var(--hero-muted)" }}
+          >
             <span
               className="w-4 h-[1.5px] rounded-full inline-block"
-              style={{ background: "var(--accent-purple)" }}
+              style={{ background: "var(--color-accent)" }}
             />
             Co potrafi Analyss
             <span
               className="w-4 h-[1.5px] rounded-full inline-block"
-              style={{ background: "var(--accent-purple)" }}
+              style={{ background: "var(--color-accent)" }}
             />
           </div>
-          <h2 className="text-[36px] md:text-[56px] font-black tracking-[-0.02em] leading-[1.05] mb-4">
-            6 sygnałów,{" "}
-            <span className="bg-gradient-to-r from-[#7C6FE8] to-[#F27C5E] bg-clip-text text-transparent">
-              1 werdykt
-            </span>
+          <h2 className="text-[36px] md:text-[56px] font-black tracking-[-0.02em] leading-[1.05] mb-4 text-white">
+            6 sygnałów, <span style={{ color: "var(--color-accent)" }}>1 werdykt</span>
           </h2>
-          <p className="text-[16px] text-[#6B6A63] max-w-[400px] mx-auto leading-relaxed">
+          <p
+            className="text-[16px] max-w-[400px] mx-auto leading-relaxed"
+            style={{ color: "var(--hero-muted)" }}
+          >
             Analiza oparta na najczęstszych wzorcach ghost jobów
           </p>
         </div>
@@ -945,38 +953,38 @@ function Features() {
         {/* Bento grid */}
         <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
           {/* ── Card 1 — large hero card ────────────────────────────────── */}
-          <div className="lg:col-span-4 bg-white rounded-2xl p-8 relative overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.04)]">
+          <div
+            className="lg:col-span-4 rounded-2xl p-8 relative overflow-hidden"
+            style={{ background: "var(--hero-card-bg)" }}
+          >
             {/* Background glow */}
             <div
               className="absolute -top-16 -right-16 w-64 h-64 rounded-full pointer-events-none"
               style={{
                 background:
-                  "radial-gradient(circle, rgba(124,111,232,0.1) 0%, transparent 70%)",
+                  "radial-gradient(circle, rgba(24,119,242,0.16) 0%, transparent 70%)",
               }}
             />
 
             {/* Header */}
             <div className="flex items-start gap-4 mb-6">
-              <IconPill
-                bg="linear-gradient(135deg, #E9E5FE, #D4CFFB)"
-                color="var(--accent-purple)"
-              >
+              <IconPill bg="var(--color-accent-muted)" color="var(--color-accent)">
                 <IcoGhost />
               </IconPill>
               <div>
                 <div
                   className="text-[10px] font-bold tracking-[0.1em] uppercase mb-1"
-                  style={{ color: "var(--accent-purple)" }}
+                  style={{ color: "var(--color-accent)" }}
                 >
                   Detekcja
                 </div>
-                <h3 className="text-[20px] font-bold tracking-tight text-[#0A0A0A] leading-snug">
+                <h3 className="text-[20px] font-bold tracking-tight text-white leading-snug">
                   Wykrywa oferty-widma
                 </h3>
               </div>
             </div>
 
-            <p className="text-[14px] text-[#6B6A63] leading-[1.65] mb-7 max-w-xs">
+            <p className="text-[14px] leading-[1.65] mb-7 max-w-xs" style={{ color: "var(--hero-muted)" }}>
               Ogłoszenia, które wiszą miesiącami i wracają, mimo że nikt nie
               jest zatrudniany.
             </p>
@@ -987,35 +995,31 @@ function Features() {
                 <div
                   key={job.role}
                   className="flex items-center justify-between rounded-xl px-3.5 py-2.5"
-                  style={{ background: "#F7F6F4" }}
+                  style={{ background: "rgba(255,255,255,0.04)" }}
                 >
                   <div className="flex items-center gap-2.5">
                     <div
                       className="w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{
-                        background: job.ghost
-                          ? "var(--accent-coral)"
-                          : "#16A34A",
-                      }}
+                      style={{ background: job.ghost ? "#F87171" : "#4ADE80" }}
                     />
-                    <span className="text-[12px] font-medium text-[#0A0A0A]">
+                    <span className="text-[12px] font-medium text-white">
                       {job.role}
                     </span>
-                    <span className="text-[11px] text-[#9C9B93] hidden sm:inline">
+                    <span
+                      className="text-[11px] hidden sm:inline"
+                      style={{ color: "var(--hero-muted)" }}
+                    >
                       · {job.company}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[11px] text-[#9C9B93]">
+                    <span className="text-[11px]" style={{ color: "var(--hero-muted)" }}>
                       {job.days}
                     </span>
                     {job.ghost && (
                       <span
                         className="text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide"
-                        style={{
-                          background: "rgba(242,124,94,0.13)",
-                          color: "var(--accent-coral)",
-                        }}
+                        style={{ background: "rgba(220,38,38,0.16)", color: "#F87171" }}
                       >
                         WIDMO
                       </span>
@@ -1029,74 +1033,71 @@ function Features() {
           {/* ── Card 2 ──────────────────────────────────────────────────── */}
           <FeatureCard
             tag="Analiza"
-            tagColor="var(--accent-purple)"
+            tagColor="var(--color-accent)"
             title="Analizuje treść ogłoszenia"
             desc="Sprawdza konkrety: opis stanowiska, zespół, zadania. Wykrywa ogólniki i frazy szablonowe."
             icon={<IcoFileSearch />}
-            iconBg="linear-gradient(135deg, #E9E5FE, #D4CFFB)"
-            iconColor="var(--accent-purple)"
+            iconBg="var(--color-accent-muted)"
+            iconColor="var(--color-accent)"
           />
 
           {/* ── Card 3 ──────────────────────────────────────────────────── */}
           <FeatureCard
             tag="Transparentność"
-            tagColor="var(--accent-coral)"
+            tagColor="var(--color-accent)"
             title="Ocenia otwartość firmy"
             desc="Widełki, forma zatrudnienia, dane rekrutera — czy firma niczego nie ukrywa."
             icon={<IcoEye />}
-            iconBg="linear-gradient(135deg, #FCE7DE, #FAD4C5)"
-            iconColor="var(--accent-coral)"
+            iconBg="var(--color-accent-muted)"
+            iconColor="var(--color-accent)"
           />
 
           {/* ── Card 4 ──────────────────────────────────────────────────── */}
           <FeatureCard
             tag="Sygnały"
-            tagColor="var(--accent-purple)"
+            tagColor="var(--color-accent)"
             title="Waży sygnały zewnętrzne"
             desc="Aktywność na LinkedIn, liczba jednoczesnych ofert, historia rotacji ogłoszenia."
             icon={<IcoActivity />}
-            iconBg="linear-gradient(135deg, #E9E5FE, #D4CFFB)"
-            iconColor="var(--accent-purple)"
+            iconBg="var(--color-accent-muted)"
+            iconColor="var(--color-accent)"
           />
 
           {/* ── Card 5 ──────────────────────────────────────────────────── */}
           <FeatureCard
             tag="Weryfikacja"
-            tagColor="var(--accent-coral)"
+            tagColor="var(--color-accent)"
             title="Wykrywa nierealne wymagania"
             desc="5 lat doświadczenia w technologii istniejącej 3 lata? To klasyczny sygnał ostrzegawczy."
             icon={<IcoCircleX />}
-            iconBg="linear-gradient(135deg, #FCE7DE, #FAD4C5)"
-            iconColor="var(--accent-coral)"
+            iconBg="var(--color-accent-muted)"
+            iconColor="var(--color-accent)"
           />
 
           {/* ── Card 6 — full width, history mock ───────────────────────── */}
-          <div className="lg:col-span-6 bg-white rounded-2xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.04)]">
-            {/* Gradient top strip */}
-            <div
-              className="h-[3px]"
-              style={{
-                background:
-                  "linear-gradient(90deg, var(--accent-purple), var(--accent-coral))",
-              }}
-            />
+          <div
+            className="lg:col-span-6 rounded-2xl overflow-hidden"
+            style={{ background: "var(--hero-card-bg)" }}
+          >
+            {/* Accent top strip */}
+            <div className="h-[3px]" style={{ background: "var(--color-accent)" }} />
             <div className="p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
               {/* Left: text */}
               <div className="flex items-start gap-4 flex-1 min-w-0">
-                <IconPill
-                  bg="linear-gradient(135deg, #E8F4D6, #D4EDBE)"
-                  color="#5A7A1E"
-                >
+                <IconPill bg="var(--color-accent-muted)" color="var(--color-accent)">
                   <IcoHistory />
                 </IconPill>
                 <div>
-                  <div className="text-[10px] font-bold tracking-[0.1em] uppercase mb-1 text-[#6B8E23]">
+                  <div
+                    className="text-[10px] font-bold tracking-[0.1em] uppercase mb-1"
+                    style={{ color: "var(--color-accent)" }}
+                  >
                     Historia
                   </div>
-                  <h3 className="text-[15px] font-bold tracking-tight text-[#0A0A0A] mb-1">
+                  <h3 className="text-[15px] font-bold tracking-tight text-white mb-1">
                     Historia analiz
                   </h3>
-                  <p className="text-[13px] text-[#6B6A63] leading-relaxed">
+                  <p className="text-[13px] leading-relaxed" style={{ color: "var(--hero-muted)" }}>
                     Wszystkie sprawdzone oferty w jednym miejscu — wracaj do
                     nich kiedy chcesz.
                   </p>
@@ -1111,13 +1112,13 @@ function Features() {
                     <div
                       key={row.role}
                       className="flex items-center justify-between rounded-xl px-3.5 py-2.5"
-                      style={{ background: "#F7F6F4" }}
+                      style={{ background: "rgba(255,255,255,0.04)" }}
                     >
-                      <span className="text-[12px] font-medium text-[#0A0A0A] truncate mr-3">
+                      <span className="text-[12px] font-medium text-white truncate mr-3">
                         {row.role}
                       </span>
                       <div className="flex items-center gap-2.5 shrink-0">
-                        <span className="text-[11px] text-[#9C9B93]">
+                        <span className="text-[11px]" style={{ color: "var(--hero-muted)" }}>
                           {row.date}
                         </span>
                         <span
@@ -1152,27 +1153,33 @@ function Pricing() {
       className="max-w-6xl mx-auto px-6 py-20"
     >
       <div className="text-center mb-14">
-        <div className="inline-block text-[12px] font-bold tracking-widest uppercase text-[#6B6A63] mb-4">
+        <div
+          className="inline-block text-[12px] font-bold tracking-widest uppercase mb-4"
+          style={{ color: "var(--hero-muted)" }}
+        >
           Cennik
         </div>
-        <h2 className="text-[36px] md:text-[54px] font-black tracking-[-0.02em] leading-[1.05] mb-3">
+        <h2 className="text-[36px] md:text-[54px] font-black tracking-[-0.02em] leading-[1.05] mb-3 text-white">
           Cena, która się zwraca
         </h2>
-        <p className="text-[16px] text-[#57564F] max-w-md mx-auto">
+        <p className="text-[16px] max-w-md mx-auto" style={{ color: "var(--hero-muted)" }}>
           Jedna zaoszczędzona godzina na fałszywej aplikacji pokrywa miesiąc
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl mx-auto">
         {/* Free */}
-        <div className="bg-white rounded-3xl p-8 flex flex-col shadow-sm">
-          <div className="text-[13px] font-bold text-[#6B6A63] mb-2">
+        <div
+          className="rounded-3xl p-8 flex flex-col border"
+          style={{ background: "var(--hero-card-bg)", borderColor: "var(--hero-border)" }}
+        >
+          <div className="text-[13px] font-bold mb-2" style={{ color: "var(--hero-muted)" }}>
             Darmowy
           </div>
-          <div className="text-[44px] font-black tracking-tight leading-none mb-1">
+          <div className="text-[44px] font-black tracking-tight leading-none mb-1 text-white">
             0 zł
           </div>
-          <div className="text-[14px] text-[#9C9B93] mb-8">na zawsze</div>
+          <div className="text-[14px] mb-8" style={{ color: "var(--hero-muted)" }}>na zawsze</div>
           <ul className="flex flex-col gap-3 mb-8 flex-1">
             {[
               "3 analizy miesięcznie",
@@ -1181,31 +1188,33 @@ function Pricing() {
             ].map((f) => (
               <li
                 key={f}
-                className="flex items-center gap-2.5 text-[14px] text-[#57564F]"
+                className="flex items-center gap-2.5 text-[14px]"
+                style={{ color: "var(--hero-muted)" }}
               >
-                <span className="text-[#16A34A] font-bold text-[16px]">✓</span>
+                <span className="text-[#4ADE80] font-bold text-[16px]">✓</span>
                 {f}
               </li>
             ))}
           </ul>
           <Link
             href="/register"
-            className="block w-full py-3.5 rounded-xl border border-[#ECEAE3] font-semibold text-center text-[15px] hover:bg-[#F1F0EE] transition-colors"
+            className="block w-full py-3.5 rounded-xl border font-semibold text-center text-[15px] transition-colors text-white"
+            style={{ borderColor: "var(--hero-border)" }}
           >
             Zacznij za darmo
           </Link>
         </div>
 
-        {/* Pro — gradient border wrapper */}
+        {/* Pro — accent border */}
         <div
           className="rounded-3xl p-[2px] relative"
-          style={{ background: "linear-gradient(135deg, #7C6FE8, #F27C5E)" }}
+          style={{ background: "var(--color-accent)" }}
         >
           {/* Badge */}
           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
             <span
               className="text-white text-[11px] font-bold rounded-full px-3 py-1 whitespace-nowrap"
-              style={{ background: "linear-gradient(90deg, #7C6FE8, #F27C5E)" }}
+              style={{ background: "var(--color-accent)" }}
             >
               WKRÓTCE
             </span>
@@ -1214,14 +1223,14 @@ function Pricing() {
             className="rounded-[22px] p-8 flex flex-col h-full"
             style={{
               background:
-                "linear-gradient(135deg, rgba(124,111,232,0.05) 0%, rgba(242,124,94,0.05) 100%), white",
+                "linear-gradient(135deg, var(--color-accent-muted) 0%, transparent 100%), var(--hero-card-bg)",
             }}
           >
-            <div className="text-[13px] font-bold text-[#6B6A63] mb-2">Pro</div>
-            <div className="text-[44px] font-black tracking-tight leading-none mb-1">
+            <div className="text-[13px] font-bold mb-2" style={{ color: "var(--hero-muted)" }}>Pro</div>
+            <div className="text-[44px] font-black tracking-tight leading-none mb-1 text-white">
               29 zł
             </div>
-            <div className="text-[14px] text-[#9C9B93] mb-8">/miesiąc</div>
+            <div className="text-[14px] mb-8" style={{ color: "var(--hero-muted)" }}>/miesiąc</div>
             <ul className="flex flex-col gap-3 mb-8 flex-1">
               {[
                 "Nielimitowane analizy",
@@ -1231,9 +1240,10 @@ function Pricing() {
               ].map((f) => (
                 <li
                   key={f}
-                  className="flex items-center gap-2.5 text-[14px] text-[#57564F]"
+                  className="flex items-center gap-2.5 text-[14px]"
+                  style={{ color: "var(--hero-muted)" }}
                 >
-                  <span className="text-[#16A34A] font-bold text-[16px]">
+                  <span className="text-[#4ADE80] font-bold text-[16px]">
                     ✓
                   </span>
                   {f}
@@ -1243,7 +1253,7 @@ function Pricing() {
             <Link
               href="/register?plan=pro"
               className="block w-full py-3.5 rounded-xl text-white font-bold text-center text-[15px] hover:-translate-y-0.5 transition-all duration-200"
-              style={{ background: "linear-gradient(90deg, #7C6FE8, #F27C5E)" }}
+              style={{ background: "var(--color-accent)" }}
             >
               Wybierz Pro
             </Link>
@@ -1267,10 +1277,13 @@ function Faq() {
     >
       <div className="max-w-3xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
-          <div className="inline-block text-[12px] font-bold tracking-widest uppercase text-[#6B6A63] mb-4">
+          <div
+            className="inline-block text-[12px] font-bold tracking-widest uppercase mb-4"
+            style={{ color: "var(--hero-muted)" }}
+          >
             FAQ
           </div>
-          <h2 className="text-[36px] md:text-[52px] font-black tracking-[-0.02em] leading-[1.05]">
+          <h2 className="text-[36px] md:text-[52px] font-black tracking-[-0.02em] leading-[1.05] text-white">
             Częste pytania
           </h2>
         </div>
@@ -1290,24 +1303,24 @@ function CtaFinal() {
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="relative overflow-hidden text-white"
-      style={{ background: "#0F0B1F" }}
+      style={{ background: "var(--hero-bg)" }}
     >
       {/* Glow blob — top left */}
       <div
         className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] rounded-full pointer-events-none"
         style={{
-          background: "var(--accent-purple)",
+          background: "var(--color-accent)",
           filter: "blur(120px)",
-          opacity: 0.4,
+          opacity: 0.35,
         }}
       />
       {/* Glow blob — bottom right */}
       <div
         className="absolute bottom-[-100px] right-[-100px] w-[500px] h-[500px] rounded-full pointer-events-none"
         style={{
-          background: "var(--accent-coral)",
+          background: "var(--color-accent)",
           filter: "blur(120px)",
-          opacity: 0.4,
+          opacity: 0.25,
         }}
       />
 
@@ -1318,17 +1331,15 @@ function CtaFinal() {
         <h2 className="text-[42px] md:text-[64px] font-black tracking-[-0.03em] leading-[1.02] mb-5">
           Przestań tracić czas
           <br />
-          na{" "}
-          <span className="bg-gradient-to-r from-[#F27C5E] to-[#7C6FE8] bg-clip-text text-transparent">
-            ghost joby
-          </span>
+          na <span style={{ color: "var(--color-accent)" }}>ghost joby</span>
         </h2>
-        <p className="text-[17px] text-[#9C9B93] mb-10 max-w-md mx-auto">
+        <p className="text-[17px] mb-10 max-w-md mx-auto" style={{ color: "var(--hero-muted)" }}>
           Sprawdź pierwsze ogłoszenie za darmo — bez karty, bez zobowiązań
         </p>
         <Link
           href="/register"
-          className="inline-block px-10 py-4 rounded-xl bg-white text-black font-bold text-[16px] hover:bg-[#F5F4EF] hover:-translate-y-0.5 transition-all duration-200"
+          className="inline-block px-10 py-4 rounded-xl text-white font-bold text-[16px] hover:brightness-110 hover:-translate-y-0.5 transition-all duration-200"
+          style={{ background: "var(--color-accent)" }}
         >
           Zacznij za darmo →
         </Link>
@@ -1342,31 +1353,20 @@ function CtaFinal() {
 function Footer() {
   return (
     <footer
-      className="bg-white rounded-t-[32px] mt-[50px]"
-      style={{
-        boxShadow: "0 -4px 32px rgba(0,0,0,0.06), 0 -1px 0 rgba(0,0,0,0.04)",
-      }}
+      className="mt-[50px] border-t"
+      style={{ background: "var(--hero-card-bg)", borderColor: "var(--hero-border)" }}
     >
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <Logo />
-        <p className="text-[13px] text-[#9C9B93]">© 2025 Analyss</p>
-        <nav className="flex items-center gap-5 text-[13px] text-[#6B6A63]">
-          <Link
-            href="/regulamin"
-            className="hover:text-[#0A0A0A] transition-colors"
-          >
+        <p className="text-[13px]" style={{ color: "var(--hero-muted)" }}>© 2025 Analyss</p>
+        <nav className="flex items-center gap-5 text-[13px]" style={{ color: "var(--hero-muted)" }}>
+          <Link href="/regulamin" className="hover:text-white transition-colors">
             Regulamin
           </Link>
-          <Link
-            href="/prywatnosc"
-            className="hover:text-[#0A0A0A] transition-colors"
-          >
+          <Link href="/prywatnosc" className="hover:text-white transition-colors">
             Prywatność
           </Link>
-          <a
-            href="mailto:kontakt@analyss.pl"
-            className="hover:text-[#0A0A0A] transition-colors"
-          >
+          <a href="mailto:kontakt@analyss.pl" className="hover:text-white transition-colors">
             Kontakt
           </a>
         </nav>
@@ -1417,7 +1417,7 @@ function AnimatedBackground() {
             width: 1100,
             height: 1100,
             background:
-              "radial-gradient(circle, rgba(124,111,232,0.14) 0%, transparent 60%)",
+              "radial-gradient(circle, rgba(24,119,242,0.14) 0%, transparent 60%)",
           }}
           animate={{ x: [0, 120, -60, 0], y: [0, 90, -70, 0] }}
           transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
@@ -1435,7 +1435,7 @@ function AnimatedBackground() {
             width: 900,
             height: 900,
             background:
-              "radial-gradient(circle, rgba(242,124,94,0.12) 0%, transparent 60%)",
+              "radial-gradient(circle, rgba(24,119,242,0.10) 0%, transparent 60%)",
           }}
           animate={{ x: [0, -90, 55, 0], y: [0, 110, -80, 0] }}
           transition={{
@@ -1458,7 +1458,7 @@ function AnimatedBackground() {
             width: 750,
             height: 750,
             background:
-              "radial-gradient(circle, rgba(232,244,214,0.35) 0%, transparent 60%)",
+              "radial-gradient(circle, rgba(24,119,242,0.07) 0%, transparent 60%)",
           }}
           animate={{ x: [0, 70, -80, 0], y: [0, -70, 90, 0] }}
           transition={{
@@ -1481,7 +1481,7 @@ function AnimatedBackground() {
             width: 950,
             height: 950,
             background:
-              "radial-gradient(circle, rgba(124,111,232,0.09) 0%, transparent 60%)",
+              "radial-gradient(circle, rgba(24,119,242,0.09) 0%, transparent 60%)",
           }}
           animate={{ x: [0, -110, 65, 0], y: [0, -65, 85, 0] }}
           transition={{
@@ -1500,7 +1500,10 @@ function AnimatedBackground() {
 
 export default function LandingPage() {
   return (
-    <div className="relative bg-[#F1F0EE] text-[#0A0A0A] overflow-x-hidden dot-grid">
+    <div
+      className="relative overflow-x-hidden"
+      style={{ background: "var(--hero-bg)", color: "var(--hero-fg)" }}
+    >
       <AnimatedBackground />
       <HeroDark />
       <Stats />

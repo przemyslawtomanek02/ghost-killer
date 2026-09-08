@@ -1,6 +1,30 @@
-@import "tailwindcss";
+/*
+ * Layer order for Astryx + Tailwind coexistence (verified against
+ * facebook/astryx's own Next.js+Tailwind example app — see
+ * apps/example-nextjs-tailwind/src/app/globals.css in that repo).
+ *
+ * Declaring all layers upfront, before any import, is required: without it
+ * Astryx's layers get created (and thus prioritized) after Tailwind's,
+ * which would let Astryx component styles beat Tailwind utility classes.
+ *
+ * Priority low -> high: reset -> theme -> base -> astryx-base ->
+ * astryx-theme -> components -> utilities. Tailwind utilities stay on top
+ * so existing className="..." styling across the app keeps working.
+ */
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/theme-stone/theme.css";
+@import "@astryxdesign/core/tailwind-theme.css";
+@import "tailwindcss/utilities.css" layer(utilities);
+
 :root {
   --font-helvetica: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-figtree, Figtree), var(--font-helvetica);
+  --font-heading: var(--font-montserrat, Montserrat), var(--font-body);
   --background: #ffffff;
   --foreground: #171717;
   --accent-purple: #7C6FE8;
@@ -9,7 +33,10 @@
   --accent-coral-soft: #FCE7DE;
   --accent-lime-soft: #E8F4D6;
 
-  /* Nowy design system (dark/blue) — na razie używany w Hero */
+  /* Nowy design system (dark/blue) — na razie używany w Hero.
+     Fallback literals for the moment before Providers' Theme (further down
+     in <body>) has mounted and set the --color-* tokens these get aliased
+     to right below — avoids a flash of unstyled hero on first paint. */
   --hero-bg: #030304;
   --hero-card-bg: #0A0A0C;
   --hero-border: #232326;
@@ -19,10 +46,35 @@
   --hero-blue-soft: rgba(47, 111, 237, 0.12);
 }
 
+/*
+ * Landing page now shares its background/card/border/text colors with the
+ * logged-in app (/app, /historia, /cv) instead of its own separate hero
+ * palette: existing var(--hero-bg/card-bg/border/fg/muted) usage across
+ * app/page.tsx (hero, stats, FAQ, pricing...) gets re-pointed at the Astryx
+ * theme's tokens. --hero-blue/--hero-blue-soft are deliberately NOT aliased
+ * here — the accent token's dark-mode value (a paler, HCT-lightened blue for
+ * contrast) reads as a different color from the hero's own vivid #2F6FED,
+ * and the brief was to keep that blue as-is, just rebuild the rest around it.
+ *
+ * Scoped to [data-astryx-theme] (the wrapper Theme renders around {children}
+ * in app/providers.tsx) rather than :root, because --color-* only exists
+ * there — :root can't reach a custom property set on a descendant.
+ * [data-astryx-theme] sits just inside <body>, above the landing page
+ * content, so these still inherit down normally.
+ */
+[data-astryx-theme] {
+  --hero-bg: var(--color-background-body);
+  --hero-card-bg: var(--color-background-card);
+  --hero-border: var(--color-border);
+  --hero-fg: var(--color-text-primary);
+  --hero-muted: var(--color-text-secondary);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-helvetica);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-jetbrains-mono, "JetBrains Mono"), ui-monospace, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -35,7 +87,50 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-helvetica);
+  font-family: var(--font-sans);
+}
+
+/*
+ * Borderless "smooth" inputs/cards (astryx.atmeta.com's own look), instead
+ * of Astryx's default outlined fields and bordered cards.
+ *
+ * Deliberately NOT inside any @layer: Astryx's own component CSS lives in
+ * the astryx-base layer, and its StyleX-generated rules boost their own
+ * specificity with a `:not(#\#):not(#\#)` hack — enough to beat a normal
+ * same-layer override no matter its specificity or source order. An
+ * unlayered rule is the one thing the cascade always prefers over any
+ * layered rule regardless of specificity, so this — not app/astryx-theme.ts's
+ * `components` override, which was tried first and silently lost — is what
+ * actually wins.
+ */
+.astryx-text-input,
+.astryx-text-area,
+.astryx-selector,
+.astryx-number-input {
+  border-width: 0;
+  /* Darker than --color-background-muted (which reads lighter than the
+     surrounding card) — --color-background-surface sinks the field below
+     the card instead of raising it above. */
+  background-color: var(--color-background-surface);
+}
+
+.astryx-card {
+  border-width: 0;
+}
+
+/*
+ * Same blue glow as .hero-dark-bg's radial gradients, but background-image
+ * only (no background-color) — layers on top of whatever background-color
+ * is already painted (--color-background-body via bg-body), instead of
+ * replacing it with the hero's own flat --hero-bg. Used on the Astryx pages
+ * (/app, /historia, /cv) to echo the hero's accent without pulling in its
+ * literal palette.
+ */
+.accent-glow-bg {
+  background-image:
+    radial-gradient(60% 55% at 14% 105%, rgba(47, 111, 237, 0.28) 0%, transparent 70%),
+    radial-gradient(55% 50% at 86% 108%, rgba(47, 111, 237, 0.22) 0%, transparent 70%),
+    radial-gradient(80% 60% at 50% 120%, rgba(47, 111, 237, 0.26) 0%, transparent 75%);
 }
 
 .dot-grid {
@@ -46,9 +141,9 @@ body {
 .hero-dark-bg {
   background-color: var(--hero-bg);
   background-image:
-    radial-gradient(60% 55% at 14% 105%, rgba(35, 82, 196, 0.4) 0%, transparent 70%),
-    radial-gradient(55% 50% at 86% 108%, rgba(28, 66, 168, 0.32) 0%, transparent 70%),
-    radial-gradient(80% 60% at 50% 120%, rgba(16, 38, 96, 0.4) 0%, transparent 75%);
+    radial-gradient(60% 55% at 14% 105%, color-mix(in srgb, var(--hero-blue) 40%, transparent) 0%, transparent 70%),
+    radial-gradient(55% 50% at 86% 108%, color-mix(in srgb, var(--hero-blue) 32%, transparent) 0%, transparent 70%),
+    radial-gradient(80% 60% at 50% 120%, color-mix(in srgb, var(--hero-blue) 40%, transparent) 0%, transparent 75%);
 }
 
 @keyframes gradient-shift {

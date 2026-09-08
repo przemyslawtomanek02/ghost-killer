@@ -1,8 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import {
+  Badge,
+  Button,
+  ClickableCard,
+  EmptyState,
+  Heading,
+  HStack,
+  Skeleton,
+  Text,
+  TextInput,
+  VStack,
+} from "@astryxdesign/core";
 import { createClient } from "@/lib/supabase/client";
 import AppSidebar from "@/app/components/AppSidebar";
 
@@ -17,10 +28,10 @@ type Analysis = {
   created_at: string;
 };
 
-const verdictStyle: Record<string, { bg: string; border: string; text: string }> = {
-  safe: { bg: "#F0FDF4", border: "#BBF7D0", text: "#166534" },
-  warning: { bg: "#FFFBEB", border: "#FDE68A", text: "#92400E" },
-  danger: { bg: "#FEF2F2", border: "#FECACA", text: "#991B1B" },
+const verdictBadge: Record<string, "success" | "warning" | "error"> = {
+  safe: "success",
+  warning: "warning",
+  danger: "error",
 };
 
 function formatDate(iso: string) {
@@ -38,6 +49,7 @@ export default function HistoriaPage() {
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const supabase = createClient();
@@ -61,10 +73,18 @@ export default function HistoriaPage() {
     });
   }, [router]);
 
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return analyses;
+    return analyses.filter((a) =>
+      [a.company, a.verdict_label, a.verdict]
+        .filter(Boolean)
+        .some((v) => v!.toLowerCase().includes(q))
+    );
+  }, [analyses, query]);
+
   return (
-    <div
-      className="flex h-screen bg-[#FAFAF7] text-[#0A0A0A] overflow-hidden"
-    >
+    <div className="flex h-screen overflow-hidden bg-body">
       <AppSidebar
         user={user}
         sidebarOpen={sidebarOpen}
@@ -73,76 +93,98 @@ export default function HistoriaPage() {
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile topbar */}
-        <div className="md:hidden flex items-center gap-3 px-4 py-3.5 border-b border-[#ECEAE3] bg-white">
+        <div
+          className="md:hidden flex items-center gap-3 px-4 py-3"
+          style={{ borderBottom: "1px solid var(--color-border)" }}
+        >
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-1.5 rounded-lg hover:bg-[#F5F4EF] transition-colors"
+            className="p-1.5 rounded-lg transition-colors"
+            style={{ color: "var(--color-text-primary)" }}
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M3 5h14M3 10h14M3 15h14" stroke="#0A0A0A" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
-          <span className="font-bold text-[17px] tracking-tight">Historia analiz</span>
+          <Text type="large" weight="bold">Historia analiz</Text>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-[720px] mx-auto px-5 py-10 pb-16">
-            <h1 className="text-[32px] font-black tracking-tight mb-1">Historia analiz</h1>
-            <p className="text-[#57564F] mb-8">Twoje ostatnie sprawdzone oferty.</p>
+            <VStack gap={1} className="mb-8">
+              <Heading level={1}>Historia analiz</Heading>
+              <Text type="body" color="secondary">
+                Twoje ostatnie sprawdzone oferty.
+              </Text>
+            </VStack>
 
             {loading && (
-              <div className="flex items-center justify-center py-20">
-                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-              </div>
+              <VStack gap={3}>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} width="100%" height={104} radius={3} />
+                ))}
+              </VStack>
             )}
 
             {!loading && analyses.length === 0 && (
-              <div className="bg-white border border-[#ECEAE3] rounded-3xl p-10 text-center">
-                <p className="text-[#57564F] mb-5">Nie masz jeszcze żadnych analiz.</p>
-                <a
-                  href="/app"
-                  className="inline-block py-3 px-6 rounded-xl bg-black text-white font-bold text-[15px] hover:bg-[#1a1a1a] transition-colors"
-                >
-                  Sprawdź pierwszą ofertę
-                </a>
-              </div>
+              <EmptyState
+                title="Nie masz jeszcze żadnych analiz."
+                actions={<Button label="Sprawdź pierwszą ofertę" href="/app" />}
+              />
             )}
 
             {!loading && analyses.length > 0 && (
-              <div className="flex flex-col gap-3">
-                {analyses.map((a) => {
-                  const vs = verdictStyle[a.verdict] ?? verdictStyle.warning;
-                  return (
-                    <Link key={a.id} href={`/historia/${a.id}`} className="block bg-white border border-[#ECEAE3] rounded-2xl p-5 hover:border-[#C9C7BF] transition-colors">
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <div className="min-w-0">
-                          <div className="font-semibold text-[15px] truncate">
-                            {a.company || "Bez nazwy firmy"}
-                          </div>
-                          <div className="text-[13px] text-[#9C9B93] mt-0.5">
-                            {formatDate(a.created_at)}
-                          </div>
-                        </div>
-                        <div
-                          className="shrink-0 text-[13px] font-bold rounded-full px-3 py-1"
-                          style={{ background: vs.bg, border: `1px solid ${vs.border}`, color: vs.text }}
-                        >
-                          {a.verdict_label || a.verdict}{a.score != null ? ` · ${a.score}/6` : ""}
-                        </div>
-                      </div>
-                      {a.summary && (
-                        <p className="text-[13.5px] text-[#57564F] leading-snug mb-2">{a.summary}</p>
-                      )}
-                      {a.job_excerpt && (
-                        <p className="text-[12.5px] text-[#9C9B93] leading-snug line-clamp-2">
-                          {a.job_excerpt}…
-                        </p>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
+              <VStack gap={4}>
+                <TextInput
+                  label="Szukaj w historii"
+                  isLabelHidden
+                  placeholder="Szukaj po firmie lub werdykcie"
+                  value={query}
+                  onChange={setQuery}
+                  width="100%"
+                />
+
+                {filtered.length === 0 ? (
+                  <EmptyState title="Brak wyników dla tego wyszukiwania." isCompact />
+                ) : (
+                  <VStack gap={3}>
+                    {filtered.map((a) => (
+                      <ClickableCard
+                        key={a.id}
+                        label={`Zobacz analizę: ${a.company || "Bez nazwy firmy"}`}
+                        href={`/historia/${a.id}`}
+                        padding={5}
+                      >
+                        <VStack gap={2}>
+                          <HStack justify="between" align="start" gap={3}>
+                            <VStack gap={0}>
+                              <Text type="label">
+                                {a.company || "Bez nazwy firmy"}
+                              </Text>
+                              <Text type="supporting" color="secondary">
+                                {formatDate(a.created_at)}
+                              </Text>
+                            </VStack>
+                            <Badge
+                              variant={verdictBadge[a.verdict] ?? "neutral"}
+                              label={`${a.verdict_label || a.verdict}${
+                                a.score != null ? ` · ${a.score}/6` : ""
+                              }`}
+                            />
+                          </HStack>
+                          {a.summary && <Text type="body">{a.summary}</Text>}
+                          {a.job_excerpt && (
+                            <Text type="supporting" color="secondary" maxLines={2}>
+                              {a.job_excerpt}…
+                            </Text>
+                          )}
+                        </VStack>
+                      </ClickableCard>
+                    ))}
+                  </VStack>
+                )}
+              </VStack>
             )}
           </div>
         </div>

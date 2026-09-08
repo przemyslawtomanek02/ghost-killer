@@ -2,10 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import AppSidebar from "@/app/components/AppSidebar";
 import type { Criterion } from "@/lib/analyze";
+import {
+  Banner,
+  Button,
+  Card,
+  Heading,
+  HStack,
+  Spinner,
+  StatusDot,
+  Text,
+  VStack,
+  type BannerStatus,
+  type StatusDotVariant,
+} from "@astryxdesign/core";
 
 type Analysis = {
   id: string;
@@ -19,16 +31,16 @@ type Analysis = {
   created_at: string;
 };
 
-const verdictColor: Record<string, { bg: string; border: string; text: string }> = {
-  safe: { bg: "#F0FDF4", border: "#BBF7D0", text: "#166534" },
-  warning: { bg: "#FFFBEB", border: "#FDE68A", text: "#92400E" },
-  danger: { bg: "#FEF2F2", border: "#FECACA", text: "#991B1B" },
+const verdictBannerStatus: Record<string, BannerStatus> = {
+  safe: "success",
+  warning: "warning",
+  danger: "error",
 };
 
-const statusColor: Record<string, string> = {
-  red: "#DC2626",
-  yellow: "#D97706",
-  green: "#16A34A",
+const statusDotVariant: Record<string, StatusDotVariant> = {
+  red: "error",
+  yellow: "warning",
+  green: "success",
 };
 
 function formatDate(iso: string) {
@@ -78,12 +90,8 @@ export default function AnalysisDetailPage() {
     });
   }, [id, router]);
 
-  const vc = analysis ? (verdictColor[analysis.verdict] ?? verdictColor.warning) : null;
-
   return (
-    <div
-      className="flex h-screen bg-[#FAFAF7] text-[#0A0A0A] overflow-hidden"
-    >
+    <div className="flex h-screen overflow-hidden bg-body">
       <AppSidebar
         user={user}
         sidebarOpen={sidebarOpen}
@@ -92,16 +100,20 @@ export default function AnalysisDetailPage() {
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile topbar */}
-        <div className="md:hidden flex items-center gap-3 px-4 py-3.5 border-b border-[#ECEAE3] bg-white">
+        <div
+          className="md:hidden flex items-center gap-3 px-4 py-3"
+          style={{ borderBottom: "1px solid var(--color-border)" }}
+        >
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-1.5 rounded-lg hover:bg-[#F5F4EF] transition-colors"
+            className="p-1.5 rounded-lg transition-colors"
+            style={{ color: "var(--color-text-primary)" }}
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M3 5h14M3 10h14M3 15h14" stroke="#0A0A0A" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
-          <span className="font-bold text-[17px] tracking-tight">Analiza</span>
+          <Text type="large" weight="bold">Analiza</Text>
         </div>
 
         {/* Content */}
@@ -111,7 +123,10 @@ export default function AnalysisDetailPage() {
             {/* Back */}
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-1.5 text-[13px] text-[#6B6A63] font-medium mb-6 hover:text-[#0A0A0A] transition-colors"
+              className="flex items-center gap-1.5 text-[13px] font-medium mb-6 transition-colors"
+              style={{ color: "var(--color-text-secondary)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--color-text-primary)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--color-text-secondary)"; }}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -121,104 +136,89 @@ export default function AnalysisDetailPage() {
 
             {loading && (
               <div className="flex items-center justify-center py-20">
-                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                <Spinner size="lg" />
               </div>
             )}
 
             {notFound && (
-              <div className="bg-white border border-[#ECEAE3] rounded-3xl p-10 text-center">
-                <p className="text-[#57564F] mb-5">Nie znaleziono analizy.</p>
-                <Link href="/historia" className="inline-block py-3 px-6 rounded-xl bg-black text-white font-bold text-[15px]">
-                  Wróć do historii
-                </Link>
-              </div>
+              <Card padding={6} style={{ textAlign: "center" }}>
+                <VStack gap={4} align="center">
+                  <Text color="secondary">Nie znaleziono analizy.</Text>
+                  <Button label="Wróć do historii" href="/historia" />
+                </VStack>
+              </Card>
             )}
 
-            {analysis && vc && (
-              <div>
+            {analysis && (
+              <VStack gap={4}>
                 {/* Header */}
-                <div className="mb-6">
-                  <h1 className="text-[28px] font-black tracking-tight leading-tight">
-                    {analysis.company || "Bez nazwy firmy"}
-                  </h1>
-                  <p className="text-[13px] text-[#9C9B93] mt-1 capitalize">
+                <VStack gap={0.5}>
+                  <Heading level={1}>{analysis.company || "Bez nazwy firmy"}</Heading>
+                  <Text type="supporting" color="secondary" style={{ textTransform: "capitalize" }}>
                     {formatDate(analysis.created_at)}
-                  </p>
-                </div>
+                  </Text>
+                </VStack>
 
                 {/* Verdict card */}
-                <div
-                  className="rounded-3xl p-6 mb-4"
-                  style={{ background: vc.bg, border: `1px solid ${vc.border}` }}
-                >
-                  <div className="flex items-baseline justify-between gap-3">
-                    <div className="text-2xl font-black tracking-tight" style={{ color: vc.text }}>
-                      {analysis.verdict_label ?? analysis.verdict}
-                    </div>
-                    {analysis.score != null && (
-                      <div className="text-sm font-bold whitespace-nowrap" style={{ color: vc.text }}>
-                        {analysis.score} / 6 red flags
-                      </div>
-                    )}
-                  </div>
-                  {analysis.summary && (
-                    <p className="mt-2.5 text-[15px] leading-relaxed" style={{ color: vc.text }}>
-                      {analysis.summary}
-                    </p>
-                  )}
-                </div>
+                <Banner
+                  status={verdictBannerStatus[analysis.verdict] ?? "warning"}
+                  title={analysis.verdict_label ?? analysis.verdict}
+                  description={analysis.summary ?? undefined}
+                  endContent={
+                    analysis.score != null ? (
+                      <Text weight="bold" wordBreak="break-word">{analysis.score} / 6</Text>
+                    ) : undefined
+                  }
+                />
 
                 {/* Criteria */}
                 {analysis.criteria && analysis.criteria.length > 0 && (
-                  <div className="bg-white border border-[#ECEAE3] rounded-3xl overflow-hidden mb-5">
+                  <Card padding={0}>
                     {analysis.criteria.map((c, i) => (
-                      <div
+                      <HStack
                         key={i}
-                        className="flex gap-3 px-5 py-4"
+                        gap={3}
+                        align="start"
+                        className="px-5 py-4"
                         style={{
                           borderBottom:
                             i < (analysis.criteria?.length ?? 0) - 1
-                              ? "1px solid #F2F0EA"
+                              ? "1px solid var(--color-border)"
                               : "none",
                         }}
                       >
-                        <div
-                          className="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0"
-                          style={{ background: statusColor[c.status] ?? "#9C9B93" }}
-                        />
-                        <div>
-                          <div className="text-[14.5px] font-semibold">{c.name}</div>
-                          <div className="text-[13.5px] text-[#6B6A63] mt-0.5 leading-snug">
-                            {c.reason}
-                          </div>
+                        <div className="pt-1.5">
+                          <StatusDot variant={statusDotVariant[c.status] ?? "neutral"} label={c.status} />
                         </div>
-                      </div>
+                        <VStack gap={0}>
+                          <Text type="label">{c.name}</Text>
+                          <Text type="supporting" color="secondary">{c.reason}</Text>
+                        </VStack>
+                      </HStack>
                     ))}
-                  </div>
+                  </Card>
                 )}
 
                 {/* Excerpt */}
                 {analysis.job_excerpt && (
-                  <div className="bg-white border border-[#ECEAE3] rounded-2xl px-5 py-4">
-                    <div className="text-[12px] font-bold text-[#9C9B93] uppercase tracking-wider mb-2">
-                      Fragment ogłoszenia
-                    </div>
-                    <p className="text-[13.5px] text-[#57564F] leading-relaxed">
-                      {analysis.job_excerpt}…
-                    </p>
-                  </div>
+                  <Card padding={5}>
+                    <VStack gap={2}>
+                      <Text
+                        type="supporting"
+                        weight="bold"
+                        color="secondary"
+                        style={{ textTransform: "uppercase", letterSpacing: "0.06em" }}
+                      >
+                        Fragment ogłoszenia
+                      </Text>
+                      <Text type="supporting" color="secondary">{analysis.job_excerpt}…</Text>
+                    </VStack>
+                  </Card>
                 )}
 
                 {/* New analysis CTA */}
-                <div className="mt-6">
-                  <a
-                    href="/app"
-                    className="block w-full py-3.5 rounded-xl bg-black text-white font-bold text-[15px] text-center hover:bg-[#1a1a1a] transition-colors"
-                  >
-                    Sprawdź kolejną ofertę →
-                  </a>
-                </div>
-              </div>
+                <Button label="Sprawdź kolejną ofertę →" href="/app" width="100%" />
+              </VStack>
             )}
           </div>
         </div>
